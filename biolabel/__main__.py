@@ -16,6 +16,8 @@ from utils.qt import newIcon
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    app.setWindowIcon(newIcon("icon"))
+    app.setApplicationName(__appname__)
     win = MainWindow()
     win.show()
     sys.exit(app.exec_())
