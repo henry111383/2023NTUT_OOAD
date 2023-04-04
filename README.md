@@ -15,7 +15,7 @@ This is project repository of OOAD in lab1621.
 │   ├── test.py
 │   └── utils
 │       └── qt.py
-├── requirments.txt
+├── requirements.txt
 └── test
     └── test_img.py
 
