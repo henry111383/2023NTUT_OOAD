@@ -6,6 +6,7 @@ import os.path as osp
 import re
 import webbrowser
 
+
 # import imgviz
 # import natsort
 from PyQt5 import QtCore
@@ -21,3 +22,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 super(MainWindow, self).__init__()
                 self.setWindowTitle(__appname__)
                 self.setWindowIcon(newIcon("icon"))
+                
+
+                

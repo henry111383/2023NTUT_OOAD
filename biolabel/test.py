@@ -1,7 +1,8 @@
-# encode:utf-8
+import numpy as np
+import matplotlib.pyplot as plt
+import cv2
 
-# noqa
-import logging
-import sys
-
-import PyQt5
+img = cv2.imread("/Users/jinghan/Documents/OOAD/2023_OOAD/biolabel/icons/icon.png")
+print(img)
+plt.imshow(img)
+plt.show()
