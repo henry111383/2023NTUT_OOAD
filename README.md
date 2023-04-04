@@ -1,12 +1,23 @@
 # 2023_OOAD
 This is project repository of OOAD in lab1621. 
+## Usage
+    python biolabel
+## FileStructure
 ```
 .
 ├── README.md
-├── src
-│   ├── buttom_plot.py
-│   └── test.py
+├── biolabel
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── app.py
+│   ├── icon
+│   │   └── icon.png
+│   ├── test.py
+│   └── utils
+│       └── qt.py
+├── requirments.txt
 └── test
+    └── test_img.py
 
-3 directories, 3 files
+5 directories, 9 files
 ```
