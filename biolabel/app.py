@@ -13,10 +13,12 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
+import utils
 
 
 from __init__ import __appname__
 
+# This is for app view
 class MainWindow(QtWidgets.QMainWindow):
         def __init__(self):
                 super(MainWindow, self).__init__()
@@ -25,15 +27,15 @@ class MainWindow(QtWidgets.QMainWindow):
         def initUI(self):
                 self.setWindowTitle(__appname__)
 
-                exitAct = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
-                exitAct.setShortcut('Ctrl+Q')
-                exitAct.setStatusTip('Exit application')
-                exitAct.triggered.connect(QtWidgets.qApp.quit)
 
                 menuBar = self.menuBar()
-                fileMenu = menuBar.addMenu('&File')
-                fileMenu.addAction(exitAct)
-                testMenu = menuBar.addMenu('&Test')
+                fileMenu = self.menu('&File')
+                self.setAction(fileMenu, '&Exit', 'Ctrl+Q', 'Exit application', self.close)
+                # fileMenu.addSeparator() ## 加一個分隔線
+               
+                testMenu = self.menu('&Test')
+
+                # let MacOS can also show the menu bar
                 menuBar.setNativeMenuBar(False)
                 
                 self.setGeometry(300,300,1000,800)
@@ -41,4 +43,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 self.show()
 
-                
+
+        def menu(self, title):
+                menu = self.menuBar().addMenu(title)
+                return menu
+        
+        def setAction(self, menu, ActionName=None, Shortcut=None, StatusTip=None, TriggerAction=None):
+                if isinstance(menu, QtWidgets.QMenu):
+                        if Shortcut and StatusTip and TriggerAction:
+                                Act = QtWidgets.QAction(ActionName, self)
+                                Act.setShortcut(Shortcut)
+                                Act.setStatusTip(StatusTip)
+                                Act.triggered.connect(TriggerAction)
+                                menu.addAction(Act)
+                                return
+                        
