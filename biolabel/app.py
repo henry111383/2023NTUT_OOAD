@@ -30,8 +30,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 menuBar = self.menuBar()
                 fileMenu = self.menu('&File')
+                self.setAction(fileMenu, '&Open', 'Ctrl+O', 'Open image or label file', self.close)
+                fileMenu.addSeparator() ## 加一個分隔線
                 self.setAction(fileMenu, '&Exit', 'Ctrl+Q', 'Exit application', self.close)
-                # fileMenu.addSeparator() ## 加一個分隔線
+                
                
                 testMenu = self.menu('&Test')
 
