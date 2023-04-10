@@ -10,14 +10,16 @@ This is project repository of OOAD in lab1621.
 │   ├── __init__.py
 │   ├── __main__.py
 │   ├── app.py
-│   ├── icon
+│   ├── icons
+│   │   ├── cancel.png
 │   │   └── icon.png
 │   ├── test.py
 │   └── utils
+│       ├── __init__.py
 │       └── qt.py
 ├── requirements.txt
 └── test
     └── test_img.py
 
-5 directories, 9 files
+5 directories, 11 files
 ```

@@ -1,6 +1,5 @@
 .DS_Store
-biolabel/.DS_Store
-biolabel/icons/.DS_Store
-/biolabel/__pycache__
-/biolabel/utils/__pycache__
+.gitignore
+__pycache__
+
 
