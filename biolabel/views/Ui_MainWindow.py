@@ -70,6 +70,8 @@ class Ui_MainWindow(object):
         self.graphicsView_2 = QtWidgets.QGraphicsView(self.gridLayoutWidget)
         self.graphicsView_2.setObjectName("graphicsView_2")
         self.verticalLayout_10.addWidget(self.graphicsView_2)
+        self.scene = QtWidgets.QGraphicsScene()
+        self.graphicsView_2.setScene(self.scene)
         self.horizontalLayout_1.addLayout(self.verticalLayout_10)
         self.verticalLayout_9 = QtWidgets.QVBoxLayout()
         self.verticalLayout_9.setSpacing(0)
@@ -100,13 +102,13 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-
+        
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
+       
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Biolabel"))
         self.pushButton_22.setText(_translate("MainWindow", "Open"))
         self.pushButton_24.setText(_translate("MainWindow", "OpenDir"))
         self.pushButton_23.setText(_translate("MainWindow", "CreatePolygons"))
@@ -115,4 +117,5 @@ class Ui_MainWindow(object):
         self.label_9.setText(_translate("MainWindow", "LabelList"))
         self.label_8.setText(_translate("MainWindow", "Polygon List"))
         self.label_7.setText(_translate("MainWindow", "FileList"))
+        
 
