@@ -8,16 +8,17 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
-        self.addRect()
+        # self.addRect()
         #  # Menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.right_menu)
 
-    def addRect(self):
-        rect = QtCore.QRectF(0, 0, 100, 50)
-        rectItem = InteractiveGraphicsRectItem(rect=rect, radius=5)
-        self.ui.scene.addItem(rectItem)
-
+    # def addRect(self):
+    #     rect = QtCore.QRectF(0, 0, 100, 50)
+    #     rectItem = InteractiveGraphicsRectItem(rect=rect, radius=3.5)
+    #     self.ui.scene.addItem(rectItem)
+    def changeshape(self,shape):
+        self.ui.graphicsView_2.shape=shape
     def right_menu(self,pos):
         menu = QtWidgets.QMenu()
 
@@ -33,7 +34,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         undo_option = menu.addAction('Undo')
         
         # Menu option events
-        create_polygons_option.triggered.connect(lambda: self.addRect())
+        create_polygons_option.triggered.connect(lambda: self.changeshape("rect"))
         create_rect_option.triggered.connect(lambda: print('Goodbye'))
         create_line_option.triggered.connect(lambda: exit())
         # Position
