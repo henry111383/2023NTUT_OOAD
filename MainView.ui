@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1440</width>
-    <height>900</height>
+    <height>847</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -139,7 +139,14 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_10">
         <item>
-         <widget class="QGraphicsView" name="graphicsView_2"/>
+         <widget class="QGraphicsView" name="graphicsView_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -201,7 +208,7 @@
      <x>0</x>
      <y>0</y>
      <width>1440</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

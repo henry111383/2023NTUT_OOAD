@@ -31,7 +31,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.actionOpenFolder.triggered.connect(self.open_folder)
 
     def changeshape(self,shape):
-        self.ui.graphicsView_2.shape=shape
+        self.ui.canvas.shape=shape
 
     def right_menu(self,pos):
         menu = QtWidgets.QMenu()
@@ -80,8 +80,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # set scene
         scene = QGraphicsScene()
         scene.addItem(item)
-        self.ui.graphicsView_2.scene.addItem(item)
-
-
+        self.ui.canvas.scene.addItem(item)
         return
     
