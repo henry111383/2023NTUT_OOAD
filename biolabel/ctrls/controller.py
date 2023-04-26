@@ -7,7 +7,7 @@ from views.canvas import *
 import cv2
 
 class MainWindow_controller(QtWidgets.QMainWindow):
-    CreateMode = False 
+     
     current_file = []
     img = []
     qImg = []
@@ -18,10 +18,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.setup_control()
         
-        # self.addRect()
-        #  # Menu
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.right_menu)
+        
 
     # def addRect(self):
     #     rect = QtCore.QRectF(0, 0, 100, 50)
@@ -42,35 +39,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def changeshape(self,shape):
         self.ui.canvas.shape=shape
 
-    def right_menu(self,pos):
-        if self.CreateMode :
-            menu = QtWidgets.QMenu()
-
-            # Add menu options
-            create_polygons_option = menu.addAction('Create Polygons')
-            create_rect_option = menu.addAction('Create Rectangle')
-            create_line_option = menu.addAction('Create Line')
-            create_linestrip_option = menu.addAction('Create LineStrip')
-            create_point_option = menu.addAction('Create Point')
-            edit_polygons_option = menu.addAction('Edit Polygons')
-            edit_label_option = menu.addAction('Edit Label')
-            delete_polygons_option = menu.addAction('Delete Polygons')
-            undo_option = menu.addAction('Undo')
-            
-            # Menu option events
-            create_polygons_option.triggered.connect(lambda: self.changeshape("rect"))
-            create_rect_option.triggered.connect(lambda: print('Goodbye'))
-            create_line_option.triggered.connect(lambda: exit())
-            # Position
-            menu.exec_(self.mapToGlobal(pos))
-
     def Click_CreateLabel(self):
-        self.CreateMode = True
-        print(f'You click the CreateLabel button, and CreateMode is {self.CreateMode}')
+        self.ui.canvas.CreateMode = True
+        print(f'You click the CreateLabel button, and CreateMode is {self.ui.canvas.CreateMode}')
 
     def Click_EditLabel(self):
-        self.CreateMode = False
-        print(f'You click the EditLabel button, and CreateMode is {self.CreateMode}')
+        self.ui.canvas.CreateMode = False
+        print(f'You click the EditLabel button, and CreateMode is {self.ui.canvas.CreateMode}')
 
     def Click_DIP(self):
         print('You click the DIP button')
@@ -92,19 +67,20 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.img = cv2.imread(self.current_file)
 
         # reset the view
-        self.ui.verticalLayout_canvas.removeWidget(self.ui.canvas)
-        self.ui.canvas = GraphicView()
-        self.ui.verticalLayout_canvas.addWidget(self.ui.canvas)
-        
+        self.ui.canvas.scene.clear()
+
         # get size of image
         height, width, channel = self.img.shape
-        bytesPerline = 3 * width
+
         # set QImage
-        self.qImg = QImage(self.img.data, width, height, bytesPerline, QImage.Format_RGB888).rgbSwapped()
+        self.qImg = QImage(self.current_file)
+
         # set QPixmanp
         pix = QPixmap.fromImage(self.qImg)
         item = QGraphicsPixmapItem(pix)
-        
+        self.ui.canvas.scene.setSceneRect(QRectF(0, 0, width, height))
         self.ui.canvas.scene.addItem(item)
+
+        self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         return
     
