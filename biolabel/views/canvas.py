@@ -3,6 +3,7 @@ from PyQt5.QtCore import QRectF, Qt, QPointF ,QLineF ,QSize
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap
 from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets
+import cv2
 
 class MyScene(QGraphicsScene):#自定场景
     pen_color=Qt.red    #畫筆顏色

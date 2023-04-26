@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsPixmapItem
 from PyQt5.QtGui import QImage, QPixmap
 from views.rect import InteractiveGraphicsRectItem
 from views.Ui_MainWindow import Ui_MainWindow
+from views.canvas import *
 import cv2
 
 class MainWindow_controller(QtWidgets.QMainWindow):
@@ -69,6 +70,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def read_img_to_view(self):
         # read image
         self.img = cv2.imread(self.current_file)
+
+        # reset the view
+        self.ui.verticalLayout_canvas.removeWidget(self.ui.canvas)
+        self.ui.canvas = GraphicView()
+        self.ui.verticalLayout_canvas.addWidget(self.ui.canvas)
+        
         # get size of image
         height, width, channel = self.img.shape
         bytesPerline = 3 * width
@@ -77,9 +84,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # set QPixmanp
         pix = QPixmap.fromImage(self.qImg)
         item = QGraphicsPixmapItem(pix)
-        # set scene
-        scene = QGraphicsScene()
-        scene.addItem(item)
+        
         self.ui.canvas.scene.addItem(item)
         return
     

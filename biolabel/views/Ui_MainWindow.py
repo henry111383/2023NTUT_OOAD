@@ -103,8 +103,8 @@ class Ui_MainWindow(object):
         self.listWidget_6.setObjectName("listWidget_6")
         self.verticalLayout_1.addWidget(self.listWidget_6)
         self.horizontalLayout_1.addLayout(self.verticalLayout_1)
-        self.verticalLayout_10 = QtWidgets.QVBoxLayout()
-        self.verticalLayout_10.setObjectName("verticalLayout_10")
+        self.verticalLayout_canvas = QtWidgets.QVBoxLayout()
+        self.verticalLayout_canvas.setObjectName("verticalLayout_canvas")
 
         # === canvas ===
         self.canvas = GraphicView(self.centralwidget)
@@ -115,8 +115,8 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.canvas.sizePolicy().hasHeightForWidth())
         self.canvas.setSizePolicy(sizePolicy)
         self.canvas.setObjectName("graphicsView_2")
-        self.verticalLayout_10.addWidget(self.canvas)
-        self.horizontalLayout_1.addLayout(self.verticalLayout_10)
+        self.verticalLayout_canvas.addWidget(self.canvas)
+        self.horizontalLayout_1.addLayout(self.verticalLayout_canvas)
         self.verticalLayout_9 = QtWidgets.QVBoxLayout()
         self.verticalLayout_9.setSpacing(0)
         self.verticalLayout_9.setObjectName("verticalLayout_9")
