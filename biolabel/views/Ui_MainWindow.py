@@ -27,15 +27,20 @@ class Ui_MainWindow(object):
         self.verticalLayout_11 = QtWidgets.QVBoxLayout()
         self.verticalLayout_11.setSpacing(0)
         self.verticalLayout_11.setObjectName("verticalLayout_11")
+
+        # === font of toolButton ===
+        font = QtGui.QFont()
+        font.setFamily("Agency FB")
+        font.setPointSize(14)
+        # ==========================
+
+        # === toolButton: CreateLabel ===
         self.toolButton = QtWidgets.QToolButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.toolButton.sizePolicy().hasHeightForWidth())
         self.toolButton.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setFamily("Agency FB")
-        font.setPointSize(14)
         self.toolButton.setFont(font)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("biolabel/icons/pen.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -44,15 +49,14 @@ class Ui_MainWindow(object):
         self.toolButton.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         self.toolButton.setObjectName("toolButton")
         self.verticalLayout_11.addWidget(self.toolButton)
+
+        # === toolButton: EditLabel ===
         self.toolButton_2 = QtWidgets.QToolButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.toolButton_2.sizePolicy().hasHeightForWidth())
         self.toolButton_2.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setFamily("Agency FB")
-        font.setPointSize(14)
         self.toolButton_2.setFont(font)
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap("biolabel/icons/select.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -61,6 +65,8 @@ class Ui_MainWindow(object):
         self.toolButton_2.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         self.toolButton_2.setObjectName("toolButton_2")
         self.verticalLayout_11.addWidget(self.toolButton_2)
+
+        # === toolButton: DIP ===
         self.toolButton_3 = QtWidgets.QToolButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -74,6 +80,7 @@ class Ui_MainWindow(object):
         self.toolButton_3.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         self.toolButton_3.setObjectName("toolButton_3")
         self.verticalLayout_11.addWidget(self.toolButton_3)
+
         self.label_9 = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
@@ -90,6 +97,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_10.setObjectName("verticalLayout_10")
         self.graphicsView_2 = GraphicView()
         self.graphicsView_2.setObjectName("graphicsView_2")
+        # self.canvas = QGraphicsView()
         self.verticalLayout_10.addWidget(self.graphicsView_2)
         self.horizontalLayout_1.addLayout(self.verticalLayout_10)
         self.verticalLayout_9 = QtWidgets.QVBoxLayout()

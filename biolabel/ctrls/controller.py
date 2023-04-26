@@ -80,7 +80,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # set scene
         scene = QGraphicsScene()
         scene.addItem(item)
-        self.ui.graphicsView_2.setScene(scene)
+        self.ui.graphicsView_2.scene.addItem(item)
 
 
         return
