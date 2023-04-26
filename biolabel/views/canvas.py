@@ -4,13 +4,15 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIco
 from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets
 import cv2
+from utils.point import Point
+from utils.rect import getAccurateRect
 
 class MyScene(QGraphicsScene):#自定场景
     pen_color=Qt.red    #畫筆顏色
     pen_width = 5       #畫筆粗細
-    def __init__(self):#初始函数
+    def __init__(self):
         super(MyScene, self).__init__(parent=None) #实例化QGraphicsScene
-        # self.setSceneRect(0,0,300,400) #设置场景起始及大小，默认场景是中心为起始，不方便后面的代码
+        self.setSceneRect(0,0,400,400) #设置场景起始及大小，默认场景是中心为起始，不方便后面的代码
 
         # self.setForegroundBrush(Qt.white)
         self.EraseMode=False
@@ -21,10 +23,16 @@ class MyScene(QGraphicsScene):#自定场景
         # rect.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
         # rect.setPos(60,100)
         # self.addItem(rect)
+        self.pen_color = Qt.red
+        self.pen_width = 5 
+        self.drawing = False
+        self.x=0
+        self.y=0
+        self.wx=0
+        self.wy=0
 
     def drawBackground(self, painter: QPainter, rect: QRectF):
-        painter.drawRect(0,0,600,500)
-
+        painter.drawRect(0,0,self.width(),self.height())
 
     def Eraser(self,b=False):
         self.EraseMode = b
@@ -43,28 +51,72 @@ class MyScene(QGraphicsScene):#自定场景
 
     def ChangeEraserThickness(self,EraserThickness):
         self.Eraser_pen_width=EraserThickness
+    
+    
     def mousePressEvent(self, event):
-        """重载鼠标按下事件"""
+        # 滑鼠按下事件
+        super(MyScene, self).mousePressEvent(event)
         if event.button() == Qt.LeftButton:
-            # 获取鼠标在场景中的坐标
+            # get the cooridinate in scene
             pos = event.scenePos()
-            # 在场景中添加一个新的矩形
-            print(pos)
+            self.x = pos.x()
+            self.y = pos.y()
+            # print(self.x, self.y)
+
+            if not self.drawing :
+                self.drawing = True
+                self.points = [Point(self.x, self.y)]
+                
+                pp=QPen()    
+                pp.setColor(self.pen_color)
+                pp.setWidth(self.pen_width)
+                self.line_path = QPainterPath()
+                
+            else:
+                self.drawing = False
+                self.points.append(Point(self.x, self.y))
+                print(self.points[0].x(), self.points[0].y())
+                print(self.points[1].x(), self.points[1].y())
+                rectangle = getAccurateRect(self.points[0],self.points[1])
+                self.line_path.addRect(rectangle)
+                self.r = RectItem(self.pen_color,self.pen_width,self.line_path.boundingRect())
+                self.addItem(self.r)
+
+
+    def mouseMoveEvent(self, event):
+        # 滑鼠移動事件
+        super(MyScene, self).mouseMoveEvent(event)
+        pos = event.scenePos()
+        self.wx = pos.x()
+        self.wy = pos.y()
+        # print('Move:', self.wx, self.wy)
+
+        # if self.drawing :
+        #     self.w = self.wx-self.x
+        #     self.h = self.wy-self.y
+        #     self.path.addRect(self.x, self.y, self.w, self.h)
+        #     self.tempPath.setPath(self.path)
+        #     # self.addItem(self.tempPath)
+
+
 
 class GraphicView(QGraphicsView):
     
     CreateMode = False
+    EditMode   = True
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setMouseTracking(True)
         try:
-            self.scene = QGraphicsScene()  # 设置管理QgraphicsItems的场景
+            self.scene = MyScene()  # 设置管理QgraphicsItems的场景
+            self.setAlignment(Qt.AlignTop | Qt.AlignCenter)
+            # self.scene.setSceneRect(0, 0, 50, 10)
             # 預設rectangle
             self.shape = "rect"   
             # 預設筆的顏色
             self.pen_color = Qt.red  # 预设笔的颜色
             self.pen_width = 5  # 预设笔的宽度
-
 
 
             # 预设以下参数的值，以防画板打开第一时间操作导入图片后self.wx-self.x=None-None而出错
@@ -104,8 +156,10 @@ class GraphicView(QGraphicsView):
             create_polygons_option.triggered.connect(lambda: self.changeshape("rect"))
             create_rect_option.triggered.connect(lambda: print('Goodbye'))
             create_line_option.triggered.connect(lambda: exit())
+            
             # Position
             menu.exec_(self.mapToGlobal(pos))
+            return
 
     def Shape(self, s):
         """返回画笔属性状态"""
@@ -125,16 +179,16 @@ class GraphicView(QGraphicsView):
         """返回变更的画笔粗细"""
         self.pen_width=thickness   # 当画笔颜色变化时，设置画笔粗细
 
-    def get_item_at_click(self, event):  # 返回鼠标点击的QgraphicsItem
-        """ 返回你所点击的item """
-        pos = event.pos()     # 注意此时是Qgraphicsview的鼠标点击位置
-        # x=self.graphicsView.mapFromParent(pos)
-        # y=self.graphicsView.mapFromScene(pos)
-        # z=self.graphicsView.mapFromGlobal(pos)
-        # print(pos,x,y,z)
-        # print(pos)
-        item = self.itemAt(pos)
-        return item
+    # def get_item_at_click(self, event):  # 返回鼠标点击的QgraphicsItem
+    #     """ 返回你所点击的item """
+    #     pos = event.pos()     # 注意此时是Qgraphicsview的鼠标点击位置
+    #     # x=self.graphicsView.mapFromParent(pos)
+    #     # y=self.graphicsView.mapFromScene(pos)
+    #     # z=self.graphicsView.mapFromGlobal(pos)
+    #     # print(pos,x,y,z)
+    #     # print(pos)
+    #     item = self.itemAt(pos)
+    #     return item
 
 
     # def mousePressEvent(self, event):
@@ -232,7 +286,7 @@ class GraphicView(QGraphicsView):
     #                     item.setFlag(QGraphicsItem.ItemIsSelectable, enabled=False)
     #                     item.setFlag(QGraphicsItem.ItemIsMovable,enabled=False)
     #                 self.path3 = QPainterPath()
-    #                 self.path3.addRect(self.x, self.y, self.w, self.h)
+    #                 self.path3.addRect(self.t.x(), self.t.y(), self.w, self.h)
     #                 self.tempPath.setPath(self.path3)
     #                 self.scene.addItem(self.tempPath)
 

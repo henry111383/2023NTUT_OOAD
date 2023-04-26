@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsPixmapItem
 from PyQt5.QtGui import QImage, QPixmap
-from views.rect import InteractiveGraphicsRectItem
+from utils.rect import InteractiveGraphicsRectItem
 from views.Ui_MainWindow import Ui_MainWindow
 from views.canvas import *
 import cv2
@@ -29,6 +29,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # menubar
         self.ui.actionOpen.triggered.connect(self.open_file)
         self.ui.actionOpenFolder.triggered.connect(self.open_folder)
+        self.ui.actionExit.triggered.connect(lambda: exit())
 
         # toolBotton
         self.ui.actionCreateLabel.triggered.connect(self.Click_CreateLabel)
@@ -41,10 +42,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def Click_CreateLabel(self):
         self.ui.canvas.CreateMode = True
+        self.ui.canvas.EditMode   = False
         print(f'You click the CreateLabel button, and CreateMode is {self.ui.canvas.CreateMode}')
 
     def Click_EditLabel(self):
         self.ui.canvas.CreateMode = False
+        self.ui.canvas.EditMode   = True
         print(f'You click the EditLabel button, and CreateMode is {self.ui.canvas.CreateMode}')
 
     def Click_DIP(self):
@@ -78,9 +81,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # set QPixmanp
         pix = QPixmap.fromImage(self.qImg)
         item = QGraphicsPixmapItem(pix)
-        self.ui.canvas.scene.setSceneRect(QRectF(0, 0, width, height))
+        self.ui.canvas.scene.setSceneRect(QRectF(0, 0, height, width))
         self.ui.canvas.scene.addItem(item)
 
-        self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+        self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
         return
     
