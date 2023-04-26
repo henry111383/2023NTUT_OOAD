@@ -37,6 +37,8 @@ class Ui_MainWindow(object):
 
         # === toolButton: CreateLabel ===
         self.toolButton_CreateLabel = QtWidgets.QToolButton(self.centralwidget)
+        self.actionCreateLabel = QtWidgets.QAction(MainWindow)
+        self.toolButton_CreateLabel.setDefaultAction(self.actionCreateLabel)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -51,8 +53,12 @@ class Ui_MainWindow(object):
         self.toolButton_CreateLabel.setObjectName("toolButton_CreateLabel")
         self.verticalLayout_1.addWidget(self.toolButton_CreateLabel)
 
+        
+
         # === toolButton: EditLabel ===
         self.toolButton_EditLabel = QtWidgets.QToolButton(self.centralwidget)
+        self.actionEditLabel = QtWidgets.QAction(MainWindow)
+        self.toolButton_EditLabel.setDefaultAction(self.actionEditLabel)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -69,6 +75,8 @@ class Ui_MainWindow(object):
 
         # === toolButton: DIP ===
         self.toolButton_DIP = QtWidgets.QToolButton(self.centralwidget)
+        self.actionDIP = QtWidgets.QAction(MainWindow)
+        self.toolButton_DIP.setDefaultAction(self.actionDIP)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
