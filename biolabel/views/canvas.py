@@ -142,7 +142,6 @@ class MyScene(QGraphicsScene):#自定场景
 
 class GraphicView(QGraphicsView):
     
-    
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -169,6 +168,26 @@ class GraphicView(QGraphicsView):
             self.setScene(self.scene)  # Qgraphicsview设置场景MyScene()
             # self.scene.addRect(0, 0, 100, 100, QPen(Qt.black), QBrush(Qt.red))
 
+            # === CreateMode下，右鍵會出現選單 ===
+            self.menu = QtWidgets.QMenu()
+            # Add menu options
+            create_polygons_option = self.menu.addAction('Create Polygons')
+            create_rect_option = self.menu.addAction('Create Rectangle')
+            create_line_option = self.menu.addAction('Create Line')
+            create_linestrip_option = self.menu.addAction('Create LineStrip')
+            create_point_option = self.menu.addAction('Create Point')
+            edit_polygons_option = self.menu.addAction('Edit Polygons')
+            edit_label_option = self.menu.addAction('Edit Label')
+            delete_polygons_option = self.menu.addAction('Delete Polygons')
+            undo_option = self.menu.addAction('Undo')
+            # Menu option events
+            create_polygons_option.triggered.connect(lambda: self.scene.ChangeShape("poly"))
+            create_rect_option.triggered.connect(lambda: self.scene.ChangeShape("rect"))
+            # create_line_option.triggered.connect(lambda: exit())
+            # =================================
+            # Position
+
+
             # 設置右鍵清單動作
             self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
             self.customContextMenuRequested.connect(self.right_menu)
@@ -177,27 +196,10 @@ class GraphicView(QGraphicsView):
             print(e)
 
     def right_menu(self, pos):
-        if self.scene.CreateMode :
+        if self.scene.CreateMode and self.scene.ImgLoad:
             self.scene.resetDrawing()
-            # === CreateMode下，右鍵會出現選單 ===
-            menu = QtWidgets.QMenu()
-            # Add menu options
-            create_polygons_option = menu.addAction('Create Polygons')
-            create_rect_option = menu.addAction('Create Rectangle')
-            create_line_option = menu.addAction('Create Line')
-            create_linestrip_option = menu.addAction('Create LineStrip')
-            create_point_option = menu.addAction('Create Point')
-            edit_polygons_option = menu.addAction('Edit Polygons')
-            edit_label_option = menu.addAction('Edit Label')
-            delete_polygons_option = menu.addAction('Delete Polygons')
-            undo_option = menu.addAction('Undo')
-            # Menu option events
-            create_polygons_option.triggered.connect(lambda: self.scene.ChangeShape("poly"))
-            create_rect_option.triggered.connect(lambda: self.scene.ChangeShape("rect"))
-            # create_line_option.triggered.connect(lambda: exit())
-            # =================================
-            # Position
-            menu.exec_(self.mapToGlobal(pos))
+            
+            self.menu.exec_(self.mapToGlobal(pos))
             return
 
     # def Shape(self, s):

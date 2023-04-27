@@ -47,7 +47,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             ("background-color: {}".format(QColor(Qt.darkGray).name()))
         self.ui.canvas.scene.EditMode   = False
         self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
-        self.StatusBarText(f'Mode : CreateLabel')
+        self.StatusBarText('Mode : CreateLabel')
         self.ChangeLabelSelectable(self.ui.canvas.scene)
         
     # === toolBotton action : Edit Label ===    
