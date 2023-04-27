@@ -40,6 +40,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def changeshape(self,shape):
         self.ui.canvas.shape=shape
 
+    # === toolBotton action : Create Label ===
     def Click_CreateLabel(self):
         self.ui.canvas.scene.CreateMode = True
         self.ui.toolButton_CreateLabel.setStyleSheet\
@@ -47,8 +48,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.EditMode   = False
         self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
         self.StatusBarText('Mode : CreateLabel')
-        # print(f'You click the CreateLabel button, and CreateMode is {self.ui.canvas.scene.CreateMode}')
-
+        
+    # === toolBotton action : Edit Label ===    
     def Click_EditLabel(self):
         self.ui.canvas.scene.CreateMode = False
         self.ui.toolButton_CreateLabel.setStyleSheet("background-color: auto")
@@ -56,11 +57,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.toolButton_EditLabel.setStyleSheet\
             ("background-color: {}".format(QColor(Qt.darkGray).name()))
         self.StatusBarText('Mode : EditLabel')
-        # print(f'You click the EditLabel button, and CreateMode is {self.ui.canvas.scene.CreateMode}')
 
+    # === toolBotton action : DIP ===
     def Click_DIP(self):
         print('You click the DIP button')
 
+    # === MenuBar action : OpenFile ===
     def open_file(self):
         self.current_file, filetype = QFileDialog.getOpenFileName(self, "Open file", "./")
         print(self.current_file, filetype)
@@ -68,6 +70,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.read_img_to_view()
             self.ui.canvas.scene.ImgLoad = True
 
+    # === MenuBar action :OpenDir ===
     def open_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Open folder", "./")
         print(folder_path)
@@ -78,16 +81,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def read_img_to_view(self):
         # read image
         self.img = cv2.imread(self.current_file)
-
         # reset the view
         self.ui.canvas.scene.clear()
-
         # get size of image
         height, width, channel = self.img.shape
-
         # set QImage
         self.qImg = QImage(self.current_file)
-
         # set QPixmanp
         pix = QPixmap.fromImage(self.qImg)
         item = QGraphicsPixmapItem(pix)
@@ -97,6 +96,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
         return
     
+    # set text in StatusBar
     def StatusBarText(self, str):
         self.ui.statusBar.showMessage(str)
         return
