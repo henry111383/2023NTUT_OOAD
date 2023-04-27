@@ -47,7 +47,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             ("background-color: {}".format(QColor(Qt.darkGray).name()))
         self.ui.canvas.scene.EditMode   = False
         self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
-        self.StatusBarText('Mode : CreateLabel')
+        self.StatusBarText(f'Mode : CreateLabel')
+        self.ChangeLabelSelectable(self.ui.canvas.scene)
         
     # === toolBotton action : Edit Label ===    
     def Click_EditLabel(self):
@@ -57,6 +58,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.toolButton_EditLabel.setStyleSheet\
             ("background-color: {}".format(QColor(Qt.darkGray).name()))
         self.StatusBarText('Mode : EditLabel')
+        self.ChangeLabelSelectable(self.ui.canvas.scene)
 
     # === toolBotton action : DIP ===
     def Click_DIP(self):
@@ -67,6 +69,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.current_file, filetype = QFileDialog.getOpenFileName(self, "Open file", "./")
         print(self.current_file, filetype)
         if self.current_file :
+            self.resetMode()
             self.read_img_to_view()
             self.ui.canvas.scene.ImgLoad = True
 
@@ -75,6 +78,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         folder_path = QFileDialog.getExistingDirectory(self, "Open folder", "./")
         print(folder_path)
         # print(self.current_file)
+
+    # reset Mode after OpenFile
+    def resetMode(self):
+        self.ui.canvas.scene.CreateMode = False
+        self.ui.toolButton_CreateLabel.setStyleSheet("background-color: auto")
+        self.ui.canvas.scene.EditMode   = False
+        self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
+        self.StatusBarText("")
 
 
     # read image to view
@@ -90,7 +101,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # set QPixmanp
         pix = QPixmap.fromImage(self.qImg)
         item = QGraphicsPixmapItem(pix)
-        self.ui.canvas.scene.setSceneRect(QRectF(0, 0, height, width))
+        self.ui.canvas.scene.setSceneRect(QRectF(0, 0, width, height))
         self.ui.canvas.scene.addItem(item)
 
         self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
@@ -100,3 +111,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def StatusBarText(self, str):
         self.ui.statusBar.showMessage(str)
         return
+    
+    # change QGraphicsItem selectable
+    def ChangeLabelSelectable(self, scene):
+        if scene.EditMode :
+            for item in scene.LabelList:
+                item.setFlag(QGraphicsItem.ItemIsSelectable, True)
+                item.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+                item.setFlag(QGraphicsItem.ItemIsFocusable, True)
+                item.setFlag(QGraphicsItem.ItemIsMovable, True) 
+        else:
+            for item in scene.LabelList:
+                item.setFlag(QGraphicsItem.ItemIsSelectable, False)
+                item.setFlag(QGraphicsItem.ItemSendsGeometryChanges, False)
+                item.setFlag(QGraphicsItem.ItemIsFocusable, False)
+                item.setFlag(QGraphicsItem.ItemIsMovable, False) 
+

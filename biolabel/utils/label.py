@@ -1,292 +1,371 @@
-import copy
-import math
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QRectF, Qt, QPointF ,QLineF ,QSize
+from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap
+from PyQt5.QtWidgets import *
+from PyQt5 import QtWidgets
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
+class Label(QGraphicsRectItem):
+    pass
 
+class RectHandle(Label):  #QGraphicsRectItem
+    """ 自定义小handles的名称、序号、控制点位置"""
+    # handles 按照顺时针排列
+    handle_names = ('left_top', 'middle_top', 'right_top', 'right_middle',
+                    'right_bottom', 'middle_bottom', 'left_bottom', 'left_middle')
+    # 设定在控制点上的光标形状
+    handle_cursors = {
+        0: Qt.SizeFDiagCursor,
+        1: Qt.SizeVerCursor,
+        2: Qt.SizeBDiagCursor,
+        3: Qt.SizeHorCursor,
+        4: Qt.SizeFDiagCursor,
+        5: Qt.SizeVerCursor,
+        6: Qt.SizeBDiagCursor,
+        7: Qt.SizeHorCursor
+    }
+    offset = 6.0  # 外边界框相对于内边界框的偏移量，也是控制点的大小
+    #min_size = 8 * offset  # 矩形框的最小尺寸
 
+    def update_handles_pos(self):
+        """
+        更新控制点的位置
+        """
+        o = self.offset  # 偏置量
+        s = o*2  # handle 的大小
+        b = self.rect()  # 获取内边框
+        x1, y1 = b.left(), b.top()  # 左上角坐标
+        offset_x = b.width()/2
+        offset_y = b.height()/2
+        # 设置 handles 的位置
+        self.handles[0] = QRectF(x1-o, y1-o, s, s)
+        self.handles[1] = self.handles[0].adjusted(offset_x, 0, offset_x, 0)
+        self.handles[2] = self.handles[1].adjusted(offset_x, 0, offset_x, 0)
+        self.handles[3] = self.handles[2].adjusted(0, offset_y, 0, offset_y)
+        self.handles[4] = self.handles[3].adjusted(0, offset_y, 0, offset_y)
+        self.handles[5] = self.handles[4].adjusted(-offset_x, 0, -offset_x, 0)
+        self.handles[6] = self.handles[5].adjusted(-offset_x, 0, -offset_x, 0)
+        self.handles[7] = self.handles[6].adjusted(0, -offset_y, 0, -offset_y)
 
-# TODO(unknown):
-# - [opt] Store paths instead of creating new ones at each paint.
+class RectItem(RectHandle):
+    """ 自定义可变矩形类"""
+    def __init__(self, color,width,*args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.handles = {}  # 控制点的字典
+        self.setAcceptHoverEvents(True)  # 设定为接受 hover 事件
+        # self.setFlags(QGraphicsItem.ItemIsSelectable |  # 设定矩形框为可选择的
+        #               QGraphicsItem.ItemSendsGeometryChanges |  # 追踪图元改变的信息
+        #               QGraphicsItem.ItemIsFocusable |  # 可聚焦
+        #               QGraphicsItem.ItemIsMovable)  # 可移动
+        self.update_handles_pos()  # 初始化控制点
+        self.reset_Ui()  # 初始化 UI 变量
+        self.pen_color=color
+        self.pen_width=width
 
-
-DEFAULT_LINE_COLOR = QtGui.QColor(0, 255, 0, 128)  # bf hovering
-DEFAULT_FILL_COLOR = QtGui.QColor(0, 255, 0, 128)  # hovering
-DEFAULT_SELECT_LINE_COLOR = QtGui.QColor(255, 255, 255)  # selected
-DEFAULT_SELECT_FILL_COLOR = QtGui.QColor(0, 255, 0, 155)  # selected
-DEFAULT_VERTEX_FILL_COLOR = QtGui.QColor(0, 255, 0, 255)  # hovering
-DEFAULT_HVERTEX_FILL_COLOR = QtGui.QColor(255, 255, 255, 255)  # hovering
-
-
-class Label(object):
-
-    # Render handles as squares
-    P_SQUARE = 0
-
-    # Render handles as circles
-    P_ROUND = 1
-
-    # Flag for the handles we would move if dragging
-    MOVE_VERTEX = 0
-
-    # Flag for all other handles on the curent shape
-    NEAR_VERTEX = 1
-
-    # The following class variables influence the drawing of all shape objects.
-    line_color = DEFAULT_LINE_COLOR
-    fill_color = DEFAULT_FILL_COLOR
-    select_line_color = DEFAULT_SELECT_LINE_COLOR
-    select_fill_color = DEFAULT_SELECT_FILL_COLOR
-    vertex_fill_color = DEFAULT_VERTEX_FILL_COLOR
-    hvertex_fill_color = DEFAULT_HVERTEX_FILL_COLOR
-    point_type = P_ROUND
-    point_size = 8
-    scale = 1.0
-
-    def __init__(
-        self,
-        label=None,
-        line_color=None,
-        shape_type=None,
-        flags=None,
-        group_id=None,
-    ):
-        self.label = label
-        self.group_id = group_id
-        self.points = []
-        self.fill = False
-        self.selected = False
-        self.shape_type = shape_type
-        self.flags = flags
-        self.other_data = {}
-
-        self._highlightIndex = None
-        self._highlightMode = self.NEAR_VERTEX
-        self._highlightSettings = {
-            self.NEAR_VERTEX: (4, self.P_ROUND),
-            self.MOVE_VERTEX: (1.5, self.P_SQUARE),
-        }
-
-        self._closed = False
-
-        if line_color is not None:
-            # Override the class line_color attribute
-            # with an object attribute. Currently this
-            # is used for drawing the pending line a different color.
-            self.line_color = line_color
-
-        self.shape_type = shape_type
-
-    @property
-    def shape_type(self):
-        return self._shape_type
-
-    @shape_type.setter
-    def shape_type(self, value):
-        if value is None:
-            value = "polygon"
-        if value not in [
-            "polygon",
-            "rectangle",
-            "point",
-            "line",
-            "circle",
-            "linestrip",
-        ]:
-            raise ValueError("Unexpected shape_type: {}".format(value))
-        self._shape_type = value
-
-    def close(self):
-        self._closed = True
-
-    def addPoint(self, point):
-        if self.points and point == self.points[0]:
-            self.close()
-        else:
-            self.points.append(point)
-
-    def canAddPoint(self):
-        return self.shape_type in ["polygon", "linestrip"]
-
-    def popPoint(self):
-        if self.points:
-            return self.points.pop()
-        return None
-
-    def insertPoint(self, i, point):
-        self.points.insert(i, point)
-
-    def removePoint(self, i):
-        self.points.pop(i)
-
-    def isClosed(self):
-        return self._closed
-
-    def setOpen(self):
-        self._closed = False
-
-    def getRectFromLine(self, pt1, pt2):
-        x1, y1 = pt1.x(), pt1.y()
-        x2, y2 = pt2.x(), pt2.y()
-        return QtCore.QRectF(x1, y1, x2 - x1, y2 - y1)
-
-    def paint(self, painter):
-        if self.points:
-            color = (
-                self.select_line_color if self.selected else self.line_color
-            )
-            pen = QtGui.QPen(color)
-            # Try using integer sizes for smoother drawing(?)
-            pen.setWidth(max(1, int(round(2.0 / self.scale))))
-            painter.setPen(pen)
-
-            line_path = QtGui.QPainterPath()
-            vrtx_path = QtGui.QPainterPath()
-
-            if self.shape_type == "rectangle":
-                assert len(self.points) in [1, 2]
-                if len(self.points) == 2:
-                    rectangle = self.getRectFromLine(*self.points)
-                    line_path.addRect(rectangle)
-                for i in range(len(self.points)):
-                    self.drawVertex(vrtx_path, i)
-            elif self.shape_type == "circle":
-                assert len(self.points) in [1, 2]
-                if len(self.points) == 2:
-                    rectangle = self.getCircleRectFromLine(self.points)
-                    line_path.addEllipse(rectangle)
-                for i in range(len(self.points)):
-                    self.drawVertex(vrtx_path, i)
-            elif self.shape_type == "linestrip":
-                line_path.moveTo(self.points[0])
-                for i, p in enumerate(self.points):
-                    line_path.lineTo(p)
-                    self.drawVertex(vrtx_path, i)
-            else:
-                line_path.moveTo(self.points[0])
-                # Uncommenting the following line will draw 2 paths
-                # for the 1st vertex, and make it non-filled, which
-                # may be desirable.
-                # self.drawVertex(vrtx_path, 0)
-
-                for i, p in enumerate(self.points):
-                    line_path.lineTo(p)
-                    self.drawVertex(vrtx_path, i)
-                if self.isClosed():
-                    line_path.lineTo(self.points[0])
-
-            painter.drawPath(line_path)
-            painter.drawPath(vrtx_path)
-            painter.fillPath(vrtx_path, self._vertex_fill_color)
-            if self.fill:
-                color = (
-                    self.select_fill_color
-                    if self.selected
-                    else self.fill_color
-                )
-                painter.fillPath(line_path, color)
-
-    def drawVertex(self, path, i):
-        d = self.point_size / self.scale
-        shape = self.point_type
-        point = self.points[i]
-        if i == self._highlightIndex:
-            size, shape = self._highlightSettings[self._highlightMode]
-            d *= size
-        if self._highlightIndex is not None:
-            self._vertex_fill_color = self.hvertex_fill_color
-        else:
-            self._vertex_fill_color = self.vertex_fill_color
-        if shape == self.P_SQUARE:
-            path.addRect(point.x() - d / 2, point.y() - d / 2, d, d)
-        elif shape == self.P_ROUND:
-            path.addEllipse(point, d / 2.0, d / 2.0)
-        else:
-            assert False, "unsupported vertex shape"
-
-    def nearestVertex(self, point, epsilon):
-        min_distance = float("inf")
-        min_i = None
-        for i, p in enumerate(self.points):
-            dist = labelme.utils.distance(p - point)
-            if dist <= epsilon and dist < min_distance:
-                min_distance = dist
-                min_i = i
-        return min_i
-
-    def nearestEdge(self, point, epsilon):
-        min_distance = float("inf")
-        post_i = None
-        for i in range(len(self.points)):
-            line = [self.points[i - 1], self.points[i]]
-            dist = labelme.utils.distancetoline(point, line)
-            if dist <= epsilon and dist < min_distance:
-                min_distance = dist
-                post_i = i
-        return post_i
-
-    def containsPoint(self, point):
-        return self.makePath().contains(point)
-
-    def getCircleRectFromLine(self, line):
-        """Computes parameters to draw with `QPainterPath::addEllipse`"""
-        if len(line) != 2:
-            return None
-        (c, point) = line
-        r = line[0] - line[1]
-        d = math.sqrt(math.pow(r.x(), 2) + math.pow(r.y(), 2))
-        rectangle = QtCore.QRectF(c.x() - d, c.y() - d, 2 * d, 2 * d)
-        return rectangle
-
-    def makePath(self):
-        if self.shape_type == "rectangle":
-            path = QtGui.QPainterPath()
-            if len(self.points) == 2:
-                rectangle = self.getRectFromLine(*self.points)
-                path.addRect(rectangle)
-        elif self.shape_type == "circle":
-            path = QtGui.QPainterPath()
-            if len(self.points) == 2:
-                rectangle = self.getCircleRectFromLine(self.points)
-                path.addEllipse(rectangle)
-        else:
-            path = QtGui.QPainterPath(self.points[0])
-            for p in self.points[1:]:
-                path.lineTo(p)
-        return path
+    def reset_Ui(self):
+        '''初始化 UI 变量'''
+        self.handleSelected = None  # 被选中的控制点
+        self.mousePressPos = None  # 鼠标按下的位置
+        #self.mousePressRect = None  # 鼠标按下的位置所在的图元的外边界框
 
     def boundingRect(self):
-        return self.makePath().boundingRect()
-
-    def moveBy(self, offset):
-        self.points = [p + offset for p in self.points]
-
-    def moveVertexBy(self, i, offset):
-        self.points[i] = self.points[i] + offset
-
-    def highlightVertex(self, i, action):
-        """Highlight a vertex appropriately based on the current action
-
-        Args:
-            i (int): The vertex index
-            action (int): The action
-            (see Shape.NEAR_VERTEX and Shape.MOVE_VERTEX)
         """
-        self._highlightIndex = i
-        self._highlightMode = action
+        限制图元的可视化区域，且防止出现图元移动留下残影的情况
+        """
+        o = self.offset
+        # 添加一个间隔为 o 的外边框
+        return self.rect().adjusted(-o,-o,o,o)
 
-    def highlightClear(self):
-        """Clear the highlighted point"""
-        self._highlightIndex = None
+    def paint(self, painter, option, widget=None):
+        """
+        Paint the node in the graphic view.
+        """
+        # painter.setBrush(QBrush(QColor(255, 0, 0, 100)))
+        painter.setPen(QPen(self.pen_color, self.pen_width, Qt.SolidLine))
+        painter.drawRect(self.rect())
+        # painter.drawEllipse(self.rect())
 
-    def copy(self):
-        return copy.deepcopy(self)
 
-    def __len__(self):
-        return len(self.points)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(QBrush(QColor(255, 255, 0, 200)))
+        painter.setPen(QPen(QColor(0, 0, 0, 255), 0,
+                                  Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
 
-    def __getitem__(self, key):
-        return self.points[key]
+        for shape in self.handles.values():
+            if self.isSelected():
+                painter.drawEllipse(shape)
 
-    def __setitem__(self, key, value):
-        self.points[key] = value
+    def handle_at(self, point):
+        """
+        返回给定 point 下的控制点 handle
+        """
+        for k, v, in self.handles.items():
+            if v.contains(point):
+                return k
+        return
+
+    def hoverMoveEvent(self, event):
+        """
+        当鼠标移到该 item（未按下）上时执行。
+        """
+        super().hoverMoveEvent(event)
+        handle = self.handle_at(event.pos())
+        cursor = self.handle_cursors[handle] if handle in self.handles else Qt.ArrowCursor
+        self.setCursor(cursor)
+
+    def hoverLeaveEvent(self, event):
+        """
+        当鼠标离开该形状（未按下）上时执行。
+        """
+        super().hoverLeaveEvent(event)
+        self.setCursor(Qt.ArrowCursor)  # 设定鼠标光标形状
+
+    def mousePressEvent(self, event):
+        """
+        当在 item 上按下鼠标时执行。
+        """
+        super().mousePressEvent(event)
+        self.handleSelected = self.handle_at(event.pos())
+        if self.handleSelected in self.handles:
+            self.mousePressPos = event.pos()
+
+    def mouseReleaseEvent(self, event):
+        """
+        Executed when the mouse is released from the item.
+        """
+        super().mouseReleaseEvent(event)
+        self.update()
+        self.reset_Ui()
+
+    def mouseMoveEvent(self, event):
+        """
+        Executed when the mouse is being moved over the item while being pressed.
+        """
+        if self.handleSelected in self.handles:
+            self.interactiveResize(event.pos())
+        else:
+            super().mouseMoveEvent(event)
+
+    def interactiveResize(self, mousePos):
+        """
+        Perform shape interactive resize.
+        """
+        rect = self.rect()
+        self.prepareGeometryChange()
+        # movePos = mousePos - self.mousePressPos
+        # move_x, move_y = movePos.x(), movePos.y()
+        if self.handleSelected == 0:
+            rect.setTopLeft(mousePos)
+        elif self.handleSelected == 1:
+            rect.setTop(mousePos.y())
+        elif self.handleSelected == 2:
+            rect.setTopRight(mousePos)
+        elif self.handleSelected == 3:
+            rect.setRight(mousePos.x())
+        elif self.handleSelected == 4:
+            rect.setBottomRight(mousePos)
+        elif self.handleSelected == 5:
+            rect.setBottom(mousePos.y())
+        elif self.handleSelected == 6:
+            rect.setBottomLeft(mousePos)
+        elif self.handleSelected == 7:
+            rect.setLeft(mousePos.x())
+        self.setRect(rect)
+        self.update_handles_pos()
+
+# class EllipseItem(RectHandle):
+#     """ 自定义可变椭圆类"""
+#     def __init__(self, color,width,*args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.handles = {}  # 控制点的字典
+#         self.setAcceptHoverEvents(True)  # 设定为接受 hover 事件
+#         self.setFlags(QGraphicsItem.ItemIsSelectable |  # 设定矩形框为可选择的
+#                       QGraphicsItem.ItemSendsGeometryChanges |  # 追踪图元改变的信息
+#                       QGraphicsItem.ItemIsFocusable |  # 可聚焦
+#                       QGraphicsItem.ItemIsMovable)  # 可移动
+#         self.update_handles_pos()  # 初始化控制点
+#         self.reset_Ui()  # 初始化 UI 变量
+#         self.pen_color=color
+#         self.pen_width=width
+
+#     def reset_Ui(self):
+#         '''初始化 UI 变量'''
+#         self.handleSelected = None  # 被选中的控制点
+#         self.mousePressPos = None  # 鼠标按下的位置
+#         #self.mousePressRect = None  # 鼠标按下的位置所在的图元的外边界框
+
+#     def boundingRect(self):
+#         """
+#         限制图元的可视化区域，且防止出现图元移动留下残影的情况
+#         """
+#         o = self.offset
+#         # 添加一个间隔为 o 的外边框
+#         return self.rect().adjusted(-o, -o, o, o)
+
+#     def paint(self, painter, option, widget=None):
+#         """
+#         Paint the node in the graphic view.
+#         """
+#         # painter.setBrush(QBrush(QColor(255, 0, 0, 100)))
+#         painter.setPen(QPen(self.pen_color, self.pen_width, Qt.SolidLine))
+#         # painter.drawRect(self.rect())
+#         painter.drawEllipse(self.rect())
+
+
+
+#         painter.setRenderHint(QPainter.Antialiasing)
+#         painter.setBrush(QBrush(QColor(255, 255, 0, 200)))
+#         painter.setPen(QPen(QColor(0, 0, 0, 255), 0,
+#                                   Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+
+#         for shape in self.handles.values():
+#             if self.isSelected():
+#                 painter.drawEllipse(shape)
+
+#     def handle_at(self, point):
+#         """
+#         返回给定 point 下的控制点 handle
+#         """
+#         for k, v, in self.handles.items():
+#             if v.contains(point):
+#                 return k
+#         return
+
+#     def hoverMoveEvent(self, event):
+#         """
+#         当鼠标移到该 item（未按下）上时执行。
+#         """
+#         super().hoverMoveEvent(event)
+#         handle = self.handle_at(event.pos())
+#         cursor = self.handle_cursors[handle] if handle in self.handles else Qt.ArrowCursor
+#         self.setCursor(cursor)
+
+#     def hoverLeaveEvent(self, event):
+#         """
+#         当鼠标离开该形状（未按下）上时执行。
+#         """
+#         super().hoverLeaveEvent(event)
+#         self.setCursor(Qt.ArrowCursor)  # 设定鼠标光标形状
+
+#     def mousePressEvent(self, event):
+#         """
+#         当在 item 上按下鼠标时执行。
+#         """
+#         super().mousePressEvent(event)
+#         self.handleSelected = self.handle_at(event.pos())
+#         if self.handleSelected in self.handles:
+#             self.mousePressPos = event.pos()
+
+#     def mouseReleaseEvent(self, event):
+#         """
+#         Executed when the mouse is released from the item.
+#         """
+#         super().mouseReleaseEvent(event)
+#         self.update()
+#         self.reset_Ui()
+
+#     def mouseMoveEvent(self, event):
+#         """
+#         Executed when the mouse is being moved over the item while being pressed.
+#         """
+#         if self.handleSelected in self.handles:
+#             self.interactiveResize(event.pos())
+#         else:
+#             super().mouseMoveEvent(event)
+
+#     def interactiveResize(self, mousePos):
+#         """
+#         Perform shape interactive resize.
+#         """
+#         rect = self.rect()
+#         self.prepareGeometryChange()
+#         # movePos = mousePos - self.mousePressPos
+#         # move_x, move_y = movePos.x(), movePos.y()
+#         if self.handleSelected == 0:
+#             rect.setTopLeft(mousePos)
+#         elif self.handleSelected == 1:
+#             rect.setTop(mousePos.y())
+#         elif self.handleSelected == 2:
+#             rect.setTopRight(mousePos)
+#         elif self.handleSelected == 3:
+#             rect.setRight(mousePos.x())
+#         elif self.handleSelected == 4:
+#             rect.setBottomRight(mousePos)
+#         elif self.handleSelected == 5:
+#             rect.setBottom(mousePos.y())
+#         elif self.handleSelected == 6:
+#             rect.setBottomLeft(mousePos)
+#         elif self.handleSelected == 7:
+#             rect.setLeft(mousePos.x())
+#         self.setRect(rect)
+#         self.update_handles_pos()
+
+# class Arrow(QGraphicsPathItem):
+#     """ 自定义箭头类，类重写的是QGraphicsPathItem"""
+#     def __init__(self, scene, color, penwidth, parent=None):
+#         super().__init__(parent)
+#         self.pen_color = color    # 从Qgraphicsview导入笔的颜色
+#         self.pen_width = penwidth    # 从Qgraphicsview导入笔的宽度
+
+#         self.scene = scene     #从Qgraphicsview导入Myscene()这个场景，并设置为它
+
+#         self.pos_src = [0, 0]
+#         self.pos_dst = [0, 0]
+
+#         self.setFlags(QGraphicsItem.ItemIsSelectable |  # 设定矩形框为可选择的
+#                       QGraphicsItem.ItemSendsGeometryChanges |  # 追踪图元改变的信息
+#                       QGraphicsItem.ItemIsFocusable |  # 可聚焦
+#                       QGraphicsItem.ItemIsMovable)  # 可移动
+
+#     def set_src(self, x, y):
+#         self.pos_src = [x, y]
+
+#     def set_dst(self, x, y):
+#         self.pos_dst = [x, y]
+
+#     def calc_path(self):
+#         path = QPainterPath(QPointF(self.pos_src[0], self.pos_src[1]))
+#         path.lineTo(self.pos_dst[0], self.pos_dst[1])
+#         return path
+
+#     def boundingRect(self):
+#         o=self.offset=self.pen_width*10
+#         x1, y1 = self.pos_src
+#         x2=self.shape().boundingRect().width()
+#         y2=self.shape().boundingRect().height()
+#         self.QF=QRectF(x1,y1,x2,y2)
+#         return self.shape().boundingRect().adjusted(-o, -o, o, o)
+#         # return self.QF.adjusted(-o,-o,o,o)
+
+
+#     def shape(self):
+#         return self.calc_path()
+
+#     def paint(self, painter, option, widget=None):
+#         self.setPath(self.calc_path())
+#         path = self.path()
+#         painter.setPen(QPen(self.pen_color, self.pen_width, Qt.SolidLine))
+#         painter.drawPath(path)
+
+#         x1, y1 = self.pos_src
+#         x2, y2 = self.pos_dst
+
+#         self.source = QPointF(x1, y1)
+#         self.dest = QPointF(x2, y2)
+#         self.line = QLineF(self.source, self.dest)
+#         # 设置垂直向量
+#         v = self.line.unitVector()
+#         v.setLength(self.pen_width*4)
+#         v.translate(QPointF(self.line.dx(), self.line.dy()))
+#         # 设置水平向量
+#         n = v.normalVector()
+#         n.setLength(n.length() * 0.5)
+#         n2 = n.normalVector().normalVector()
+#         # 设置箭头三角形的三个点
+#         p1 = v.p2()
+#         p2 = n.p2()
+#         p3 = n2.p2()
+#         # 以下用于绘制箭头，外边框粗为1.0
+#         painter.setPen(QPen(self.pen_color, 1.0, Qt.SolidLine))
+#         painter.setBrush(self.pen_color)
+#         painter.drawPolygon(p1, p2, p3)
+
