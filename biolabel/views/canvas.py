@@ -154,7 +154,7 @@ class GraphicView(QGraphicsView):
             
             # Menu option events
             create_polygons_option.triggered.connect(lambda: self.changeshape("rect"))
-            create_rect_option.triggered.connect(lambda: print('Goodbye'))
+            create_rect_option.triggered.connect(lambda: self.changeshape("line"))
             create_line_option.triggered.connect(lambda: exit())
             
             # Position

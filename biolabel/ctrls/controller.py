@@ -56,7 +56,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def open_file(self):
         self.current_file, filetype = QFileDialog.getOpenFileName(self, "Open file", "./")
         print(self.current_file, filetype)
-        self.read_img_to_view()
+        if self.current_file :
+            self.read_img_to_view()
 
     def open_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Open folder", "./")
