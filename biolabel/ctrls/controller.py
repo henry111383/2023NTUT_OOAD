@@ -41,14 +41,22 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.shape=shape
 
     def Click_CreateLabel(self):
-        self.ui.canvas.CreateMode = True
-        self.ui.canvas.EditMode   = False
-        print(f'You click the CreateLabel button, and CreateMode is {self.ui.canvas.CreateMode}')
+        self.ui.canvas.scene.CreateMode = True
+        self.ui.toolButton_CreateLabel.setStyleSheet\
+            ("background-color: {}".format(QColor(Qt.darkGray).name()))
+        self.ui.canvas.scene.EditMode   = False
+        self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
+        self.StatusBarText('Mode : CreateLabel')
+        # print(f'You click the CreateLabel button, and CreateMode is {self.ui.canvas.scene.CreateMode}')
 
     def Click_EditLabel(self):
-        self.ui.canvas.CreateMode = False
-        self.ui.canvas.EditMode   = True
-        print(f'You click the EditLabel button, and CreateMode is {self.ui.canvas.CreateMode}')
+        self.ui.canvas.scene.CreateMode = False
+        self.ui.toolButton_CreateLabel.setStyleSheet("background-color: auto")
+        self.ui.canvas.scene.EditMode   = True
+        self.ui.toolButton_EditLabel.setStyleSheet\
+            ("background-color: {}".format(QColor(Qt.darkGray).name()))
+        self.StatusBarText('Mode : EditLabel')
+        # print(f'You click the EditLabel button, and CreateMode is {self.ui.canvas.scene.CreateMode}')
 
     def Click_DIP(self):
         print('You click the DIP button')
@@ -58,6 +66,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         print(self.current_file, filetype)
         if self.current_file :
             self.read_img_to_view()
+            self.ui.canvas.scene.ImgLoad = True
 
     def open_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Open folder", "./")
@@ -88,3 +97,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
         return
     
+    def StatusBarText(self, str):
+        self.ui.statusBar.showMessage(str)
+        return

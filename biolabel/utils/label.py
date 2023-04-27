@@ -18,7 +18,7 @@ DEFAULT_VERTEX_FILL_COLOR = QtGui.QColor(0, 255, 0, 255)  # hovering
 DEFAULT_HVERTEX_FILL_COLOR = QtGui.QColor(255, 255, 255, 255)  # hovering
 
 
-class Shape(object):
+class Label(object):
 
     # Render handles as squares
     P_SQUARE = 0
