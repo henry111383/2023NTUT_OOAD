@@ -65,6 +65,10 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 not self.isOutofScene(Point(self.x, self.y)) :
                 if self.shape == 'rect':
                     self.DrawRect(pos)
+                elif self.shape == 'point':
+                    point = MyPointItem(self.x, self.y)
+                    self.addItem(point)
+                    self.LabelList.append(point)
         
 
     def mouseMoveEvent(self, event):
@@ -90,6 +94,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.points.clear()
         if self.tempLabel :
             self.removeItem(self.tempLabel)
+            del self.tempLabel
         return
         
     def DrawRect(self, pos):
@@ -121,7 +126,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         else:
             self.drawing = False
             self.removeItem(self.tempLabel)
-
+            del self.tempLabel
             self.points.append(Point(self.x, self.y))
             rectangle = getAccurateRect(self.points[0], self.points[1])
             self.label_path.addRect(rectangle)
@@ -183,6 +188,7 @@ class GraphicView(QGraphicsView):
             # Menu option events
             create_polygons_option.triggered.connect(lambda: self.scene.ChangeShape("poly"))
             create_rect_option.triggered.connect(lambda: self.scene.ChangeShape("rect"))
+            create_point_option.triggered.connect(lambda: self.scene.ChangeShape("point"))
             # create_line_option.triggered.connect(lambda: exit())
             # =================================
             # Position
