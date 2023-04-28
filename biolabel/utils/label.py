@@ -5,14 +5,16 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets
 
 class Label(QGraphicsRectItem):
-    pass
+    PointList = []
 
 class RectHandle(Label):  #QGraphicsRectItem
-    """ 自定义小handles的名称、序号、控制点位置"""
-    # handles 按照顺时针排列
+    """ 用矩形控制Label """
+
+    # handles 按照順時針排列
     handle_names = ('left_top', 'middle_top', 'right_top', 'right_middle',
                     'right_bottom', 'middle_bottom', 'left_bottom', 'left_middle')
-    # 设定在控制点上的光标形状
+    
+    # 設定在控制點的鼠標樣式
     handle_cursors = {
         0: Qt.SizeFDiagCursor,
         1: Qt.SizeVerCursor,
@@ -23,9 +25,10 @@ class RectHandle(Label):  #QGraphicsRectItem
         6: Qt.SizeBDiagCursor,
         7: Qt.SizeHorCursor
     }
-    offset = 6.0  # 外边界框相对于内边界框的偏移量，也是控制点的大小
-    #min_size = 8 * offset  # 矩形框的最小尺寸
-
+    # 控制點的圓點半徑大小
+    offset = 6.0  
+    
+    # 讓鼠標能圈選的模式
     EditMode = False
 
     def update_handles_pos(self):
@@ -48,9 +51,9 @@ class RectHandle(Label):  #QGraphicsRectItem
         self.handles[6] = self.handles[5].adjusted(-offset_x, 0, -offset_x, 0)
         self.handles[7] = self.handles[6].adjusted(0, -offset_y, 0, -offset_y)
 
-class RectItem(RectHandle):
+class RectLabel(RectHandle):
     """ 自定义可变矩形类"""
-    def __init__(self, color,width,*args, **kwargs):
+    def __init__(self, ptList, color, width, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.handles = {}  # 控制点的字典
         self.setAcceptHoverEvents(True)  # 设定为接受 hover 事件
@@ -60,14 +63,19 @@ class RectItem(RectHandle):
         #               QGraphicsItem.ItemIsMovable)  # 可移动
         self.update_handles_pos()  # 初始化控制点
         self.reset_Ui()  # 初始化 UI 变量
-        self.pen_color=color
-        self.pen_width=width
+        self.pen_color = color
+        self.pen_width = width
+        self.PointList.clear()
+        self.PointList = ptList
 
     def reset_Ui(self):
         '''初始化 UI 变量'''
         self.handleSelected = None  # 被选中的控制点
         self.mousePressPos = None  # 鼠标按下的位置
         #self.mousePressRect = None  # 鼠标按下的位置所在的图元的外边界框
+
+    def getPointList(self):
+        return self.PointList
 
     def boundingRect(self):
         """

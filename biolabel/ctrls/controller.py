@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsPixmapItem
 from PyQt5.QtGui import QImage, QPixmap
-from utils.rect import InteractiveGraphicsRectItem
+
 from views.Ui_MainWindow import Ui_MainWindow
 from views.canvas import *
 import cv2
@@ -24,12 +24,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.setup_control()
         
-        
-
-    # def addRect(self):
-    #     rect = QtCore.QRectF(0, 0, 100, 50)
-    #     rectItem = InteractiveGraphicsRectItem(rect=rect, radius=3.5)
-    #     self.ui.scene.addItem(rectItem)
 
     def setup_control(self):
         # menubar
@@ -139,6 +133,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 item.setFlag(QGraphicsItem.ItemIsMovable, False) 
                 item.EditMode = False
 
+    # 讓鼠標可以變化
     def CheckCursorStyle(self):
         if self.ui.canvas.scene.CreateMode :
             self.ui.canvas.setCursor(CURSOR_DRAW)

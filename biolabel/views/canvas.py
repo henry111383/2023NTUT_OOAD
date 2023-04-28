@@ -8,7 +8,7 @@ from utils.point import Point
 from utils.rect import getAccurateRect
 from utils.label import *
 
-class MyScene(QGraphicsScene):#自定场景
+class MyScene(QGraphicsScene): # 用來放自己的圖或標註
 
     ImgLoad = False
     CreateMode = False
@@ -22,10 +22,10 @@ class MyScene(QGraphicsScene):#自定场景
     pen_width = 5       #畫筆粗細
 
     def __init__(self):
-        super(MyScene, self).__init__(parent=None) #实例化QGraphicsScene
-        self.setSceneRect(0,0,400,400) #设置场景起始及大小，默认场景是中心为起始，不方便后面的代码
+        super(MyScene, self).__init__(parent=None) # 初始化 QGraphicsScene
+        self.setSceneRect(0,0,400,400) # 預設大小，載入檔案後會改大小
 
-        self.shape= "rect"
+        self.shape= "rect" # 預設標注模式
         self.pen_color = Qt.red
         self.pen_width = 5 
         
@@ -115,7 +115,7 @@ class MyScene(QGraphicsScene):#自定场景
 
             # 緩衝用
             rectangle = getAccurateRect(self.points[0], Point(self.x+0.01, self.y+0.01))
-            self.tempLabel = RectItem(self.pen_color, self.pen_width, rectangle)
+            self.tempLabel = RectLabel(self.points, self.pen_color, self.pen_width, rectangle)
             self.addItem(self.tempLabel)
             
         else:
@@ -125,7 +125,7 @@ class MyScene(QGraphicsScene):#自定场景
             self.points.append(Point(self.x, self.y))
             rectangle = getAccurateRect(self.points[0], self.points[1])
             self.label_path.addRect(rectangle)
-            self.r = RectItem(self.pen_color, self.pen_width, rectangle)
+            self.r = RectLabel(self.points, self.pen_color, self.pen_width, rectangle)
             self.addItem(self.r)
             self.LabelList.append(self.r)
         return
