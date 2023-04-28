@@ -65,6 +65,10 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 not self.isOutofScene(Point(self.x, self.y)) :
                 if self.shape == 'rect':
                     self.DrawRect(pos)
+                elif self.shape == 'point':
+                    point = MyPointItem(self.x, self.y)
+                    self.addItem(point)
+                    self.LabelList.append(point)
         
 
     def mouseMoveEvent(self, event):
@@ -75,10 +79,6 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         self.wy = pos.y()
         if self.shape == 'rect':
             self.ShowRectBuffer(pos)
-        elif self.shape == 'point':
-                    point = MyPointItem(self.x, self.y)
-                    self.addItem(point)
-                    self.LabelList.append(point)
         return
 
         
