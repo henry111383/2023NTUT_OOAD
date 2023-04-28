@@ -6,6 +6,12 @@ from views.Ui_MainWindow import Ui_MainWindow
 from views.canvas import *
 import cv2
 
+CURSOR_DEFAULT = QtCore.Qt.ArrowCursor
+CURSOR_POINT = QtCore.Qt.PointingHandCursor
+CURSOR_DRAW = QtCore.Qt.CrossCursor
+CURSOR_MOVE = QtCore.Qt.ClosedHandCursor
+CURSOR_GRAB = QtCore.Qt.OpenHandCursor
+
 class MainWindow_controller(QtWidgets.QMainWindow):
      
     current_file = []
@@ -49,6 +55,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
         self.StatusBarText('Mode : CreateLabel')
         self.ChangeLabelSelectable(self.ui.canvas.scene)
+        self.CheckCursorStyle()
         
     # === toolBotton action : Edit Label ===    
     def Click_EditLabel(self):
@@ -59,6 +66,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             ("background-color: {}".format(QColor(Qt.darkGray).name()))
         self.StatusBarText('Mode : EditLabel')
         self.ChangeLabelSelectable(self.ui.canvas.scene)
+        self.CheckCursorStyle()
 
     # === toolBotton action : DIP ===
     def Click_DIP(self):
@@ -86,6 +94,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.EditMode   = False
         self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
         self.StatusBarText("")
+        self.CheckCursorStyle()
 
 
     # read image to view
@@ -126,4 +135,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 item.setFlag(QGraphicsItem.ItemSendsGeometryChanges, False)
                 item.setFlag(QGraphicsItem.ItemIsFocusable, False)
                 item.setFlag(QGraphicsItem.ItemIsMovable, False) 
+
+    def CheckCursorStyle(self):
+        if self.ui.canvas.scene.CreateMode :
+            self.ui.canvas.setCursor(CURSOR_DRAW)
+        elif self.ui.canvas.scene.EditMode : 
+            self.ui.canvas.setCursor(CURSOR_GRAB)
+        else:
+            self.ui.canvas.setCursor(CURSOR_DEFAULT)
 
