@@ -188,6 +188,39 @@ class RectLabel(RectHandle):
         self.setRect(rect)
         self.update_handles_pos()
 
+class MyPointItem(QGraphicsEllipseItem):
+    # 讓鼠標能圈選的模式
+    EditMode = False
+    def __init__(self, x, y, size=100, parent=None):
+        super().__init__(parent)
+        
+        # 设置点的位置和大小
+        self.setRect(x - size/2, y - size/2, size, size)
+        
+        # 设置点的样式
+        self.setBrush(QBrush(QColor(255, 0, 0)))
+        self.setPen(QPen(Qt.NoPen))
+        
+        # 设置点的可选中和可移动属性
+        self.setFlag(self.ItemIsSelectable)
+        self.setFlag(self.ItemIsMovable)
+
+    def mousePressEvent(self, event):
+        # 在鼠标按下时记录当前点的位置
+        if event.button() == Qt.LeftButton:
+            self._last_pos = self.pos()
+
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        # 在滑鼠移動時更新點的位置
+        if self.EditMode :
+            if event.buttons() == Qt.LeftButton:
+                new_pos = self._last_pos + event.pos() - event.buttonDownPos(Qt.LeftButton)
+                self.setPos(new_pos)
+
+            super().mouseMoveEvent(event)
+
 # class EllipseItem(RectHandle):
 #     """ 自定义可变椭圆类"""
 #     def __init__(self, color,width,*args, **kwargs):
