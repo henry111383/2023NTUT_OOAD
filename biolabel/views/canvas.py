@@ -4,9 +4,9 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIco
 from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets
 import cv2
-from utils.point import Point
+from model.point import Point
 from utils.rect import getAccurateRect
-from utils.label import *
+from .Ui_label import *
 
 class MyScene(QGraphicsScene): # 用來放自己的圖或標註
 
@@ -82,7 +82,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
 
     def isOutofScene(self, pt):
         w, h = self.width(), self.height()
-        return not (0 <= pt.x() <= w - 1 and 0 <= pt.y() <= h - 1)
+        return not (0 <= pt.GetX() <= w - 1 and 0 <= pt.GetY() <= h - 1)
 
     def resetDrawing(self):
         self.drawing = False

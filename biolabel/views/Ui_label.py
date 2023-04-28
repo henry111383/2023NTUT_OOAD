@@ -4,10 +4,10 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIco
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets
 
-class Label(QGraphicsRectItem):
+class LabelItem(QGraphicsRectItem):
     PointList = []
 
-class RectHandle(Label):  #QGraphicsRectItem
+class RectHandle(LabelItem):  #QGraphicsRectItem
     """ 用矩形控制Label """
 
     # handles 按照順時針排列

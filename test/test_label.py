@@ -2,8 +2,8 @@ import unittest
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
-from biolabel.utils.point import *
-from biolabel.utils.label import *
+from biolabel.model.point import *
+from biolabel.views.Ui_label import *
 
 class Label_RectLabelShouldBeCorrect(unittest.TestCase):
     def setUp(self):

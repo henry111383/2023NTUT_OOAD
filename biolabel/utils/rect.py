@@ -3,10 +3,11 @@ import sys
 from PyQt5.QtCore import QRectF, Qt, QPointF
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush
 from PyQt5.QtWidgets import QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene, QGraphicsItem
+from model.point import Point
 
 def getRectFromLine(pt1, pt2):
-    x1, y1 = pt1.x(), pt1.y()
-    x2, y2 = pt2.x(), pt2.y()
+    x1, y1 = pt1.GetX(), pt1.GetY()
+    x2, y2 = pt2.GetX(), pt2.GetY()
     return QRectF(x1, y1, abs(x2 - x1), abs(y2 - y1))
 
 
@@ -17,17 +18,17 @@ def getAccurateRect(point1, point2):
     :param point2: the point1's diagonal point
     :return: a rectangle constructed by point1 and point2
     """
-    x1, y1 = point1.x(), point1.y()
-    x2, y2 = point2.x(), point2.y()
+    x1, y1 = point1.GetX(), point1.GetY()
+    x2, y2 = point2.GetX(), point2.GetY()
     rect = None
     if x1 < x2 and y1 < y2:
         rect = getRectFromLine(point1, point2)
     elif x1 > x2 and y1 < y2:
-        rect = getRectFromLine(QPointF(x2, y1), QPointF(x1, y2))
+        rect = getRectFromLine(Point(x2, y1), Point(x1, y2))
     elif x1 < x2 and y1 > y2:
-        rect = getRectFromLine(QPointF(x1, y2), QPointF(x2, y1))
+        rect = getRectFromLine(Point(x1, y2), Point(x2, y1))
     elif x1 > x2 and y1 > y2:
-        rect = getRectFromLine(QPointF(x2, y2), QPointF(x1, y1))
+        rect = getRectFromLine(Point(x2, y2), Point(x1, y1))
     return rect
 
 
