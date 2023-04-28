@@ -26,6 +26,8 @@ class RectHandle(Label):  #QGraphicsRectItem
     offset = 6.0  # 外边界框相对于内边界框的偏移量，也是控制点的大小
     #min_size = 8 * offset  # 矩形框的最小尺寸
 
+    EditMode = False
+
     def update_handles_pos(self):
         """
         更新控制点的位置
@@ -98,52 +100,58 @@ class RectItem(RectHandle):
         """
         返回给定 point 下的控制点 handle
         """
-        for k, v, in self.handles.items():
-            if v.contains(point):
-                return k
-        return
+        if self.EditMode :
+            for k, v, in self.handles.items():
+                if v.contains(point):
+                    return k
+            return
 
     def hoverMoveEvent(self, event):
         """
         当鼠标移到该 item（未按下）上时执行。
         """
-        super().hoverMoveEvent(event)
-        handle = self.handle_at(event.pos())
-        cursor = self.handle_cursors[handle] if handle in self.handles else Qt.ArrowCursor
-        self.setCursor(cursor)
+        if self.EditMode :
+            super().hoverMoveEvent(event)
+            handle = self.handle_at(event.pos())
+            cursor = self.handle_cursors[handle] if handle in self.handles else Qt.ArrowCursor
+            self.setCursor(cursor)
 
     def hoverLeaveEvent(self, event):
         """
         当鼠标离开该形状（未按下）上时执行。
         """
-        super().hoverLeaveEvent(event)
-        self.setCursor(Qt.ArrowCursor)  # 设定鼠标光标形状
+        if self.EditMode :
+            super().hoverLeaveEvent(event)
+            self.setCursor(Qt.ArrowCursor)  # 设定鼠标光标形状
 
     def mousePressEvent(self, event):
         """
         当在 item 上按下鼠标时执行。
         """
-        super().mousePressEvent(event)
-        self.handleSelected = self.handle_at(event.pos())
-        if self.handleSelected in self.handles:
-            self.mousePressPos = event.pos()
+        if self.EditMode :
+            super().mousePressEvent(event)
+            self.handleSelected = self.handle_at(event.pos())
+            if self.handleSelected in self.handles:
+                self.mousePressPos = event.pos()
 
     def mouseReleaseEvent(self, event):
         """
         Executed when the mouse is released from the item.
         """
-        super().mouseReleaseEvent(event)
-        self.update()
-        self.reset_Ui()
+        if self.EditMode :
+            super().mouseReleaseEvent(event)
+            self.update()
+            self.reset_Ui()
 
     def mouseMoveEvent(self, event):
         """
         Executed when the mouse is being moved over the item while being pressed.
         """
-        if self.handleSelected in self.handles:
-            self.interactiveResize(event.pos())
-        else:
-            super().mouseMoveEvent(event)
+        if self.EditMode :
+            if self.handleSelected in self.handles:
+                self.interactiveResize(event.pos())
+            else:
+                super().mouseMoveEvent(event)
 
     def interactiveResize(self, mousePos):
         """

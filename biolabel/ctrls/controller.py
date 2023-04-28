@@ -129,12 +129,15 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 item.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
                 item.setFlag(QGraphicsItem.ItemIsFocusable, True)
                 item.setFlag(QGraphicsItem.ItemIsMovable, True) 
+                item.EditMode = True
+                
         else:
             for item in scene.LabelList:
                 item.setFlag(QGraphicsItem.ItemIsSelectable, False)
                 item.setFlag(QGraphicsItem.ItemSendsGeometryChanges, False)
                 item.setFlag(QGraphicsItem.ItemIsFocusable, False)
                 item.setFlag(QGraphicsItem.ItemIsMovable, False) 
+                item.EditMode = False
 
     def CheckCursorStyle(self):
         if self.ui.canvas.scene.CreateMode :
