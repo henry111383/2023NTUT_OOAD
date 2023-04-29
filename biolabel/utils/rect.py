@@ -3,7 +3,7 @@ import sys
 from PyQt5.QtCore import QRectF, Qt, QPointF
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush
 from PyQt5.QtWidgets import QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene, QGraphicsItem
-from model.point import Point
+from Model.point import Point
 
 def getRectFromLine(pt1, pt2):
     x1, y1 = pt1.GetX(), pt1.GetY()

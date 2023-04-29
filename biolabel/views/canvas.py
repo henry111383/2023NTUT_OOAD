@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIco
 from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets
 import cv2
-from model.point import Point
+from Model.point import Point
 from utils.rect import getAccurateRect
 from .Ui_label import *
 
@@ -17,6 +17,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     points = None
     tempLabel = None
     LabelList = []
+    current = None
 
     pen_color=Qt.red    #畫筆顏色
     pen_width = 5       #畫筆粗細
@@ -69,6 +70,9 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                     point = MyPointItem(self.x, self.y)
                     self.addItem(point)
                     self.LabelList.append(point)
+                elif self.shape == 'line':
+                    self.DrawLine()
+                    
         
 
     def mouseMoveEvent(self, event):
@@ -79,6 +83,10 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         self.wy = pos.y()
         if self.shape == 'rect':
             self.ShowRectBuffer(pos)
+        if self.shape == 'line':
+            if self.drawing:
+                self.current.setEndPoint(pos.x(),pos.y())
+                self.current.update()
         return
 
         
@@ -131,6 +139,21 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 self.tempLabel.setRect(rectangle)
         return
 
+    def DrawLine(self):
+        if not self.drawing :
+            self.drawing = True
+            self.points = [Point(self.x, self.y)]
+            self.current = MyLineItem(self.x, self.y,self.x, self.y)
+            self.addItem(self.current)
+            
+        else:
+            self.drawing = False
+
+            self.points.append(Point(self.x, self.y))
+            self.current.setEndPoint(self.x, self.y)
+            self.current.update()
+            self.LabelList.append(self.current)
+        return
 
 class GraphicView(QGraphicsView):
     
@@ -176,7 +199,7 @@ class GraphicView(QGraphicsView):
             create_polygons_option.triggered.connect(lambda: self.scene.ChangeShape("poly"))
             create_rect_option.triggered.connect(lambda: self.scene.ChangeShape("rect"))
             create_point_option.triggered.connect(lambda: self.scene.ChangeShape("point"))
-            # create_line_option.triggered.connect(lambda: exit())
+            create_line_option.triggered.connect(lambda: self.scene.ChangeShape("line"))
             # =================================
             # Position
 

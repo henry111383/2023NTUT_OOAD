@@ -191,7 +191,7 @@ class RectLabel(RectHandle):
 class MyPointItem(QGraphicsEllipseItem):
     # 讓鼠標能圈選的模式
     EditMode = False
-    def __init__(self, x, y, size=100, parent=None):
+    def __init__(self, x, y, size=20, parent=None):
         super().__init__(parent)
         
         # 设置点的位置和大小
@@ -200,6 +200,7 @@ class MyPointItem(QGraphicsEllipseItem):
         # 设置点的样式
         self.setBrush(QBrush(QColor(255, 0, 0)))
         self.setPen(QPen(Qt.NoPen))
+
         
         # 设置点的可选中和可移动属性
         self.setFlag(self.ItemIsSelectable)
@@ -211,7 +212,7 @@ class MyPointItem(QGraphicsEllipseItem):
             self._last_pos = self.pos()
 
         super().mousePressEvent(event)
-
+    
     def mouseMoveEvent(self, event):
         # 在滑鼠移動時更新點的位置
         if self.EditMode :
@@ -220,6 +221,39 @@ class MyPointItem(QGraphicsEllipseItem):
                 self.setPos(new_pos)
 
             super().mouseMoveEvent(event)
+class LinePoint(QGraphicsEllipseItem):
+    def __init__(self, x, y, radius=10, parent=None):
+        super().__init__(parent)
+        self.setPos(x, y)
+        self.setRect(-radius, -radius, radius*2, radius*2)
+        self.setBrush(QBrush(QColor(Qt.red)))
+        self.setFlags(QGraphicsEllipseItem.ItemIsMovable | QGraphicsEllipseItem.ItemSendsScenePositionChanges)
+
+    def itemChange(self, change, value):
+        if change == QGraphicsEllipseItem.ItemScenePositionHasChanged:
+            self.parentItem().updateLine()
+            print(type(self.parentItem()))
+        return super().itemChange(change, value)
+                
+class MyLineItem(QGraphicsLineItem):
+    def __init__(self, x1, y1, x2, y2,parent=None):
+        super().__init__(x1, y1, x2, y2, parent)
+        pen = QPen(QColor(Qt.black))
+        pen.setWidth(5)
+        self.setPen(pen)
+        self.point1 = LinePoint(x1, y1, parent=self)
+        self.point2 = LinePoint(x2, y2, parent=self)
+
+    def updateLine(self):
+        start = self.point1.scenePos()
+        end = self.point2.scenePos()
+        self.setLine(start.x(), start.y(), end.x(), end.y())
+    def setStartPoint(self, x, y):
+        size=20
+        self.point1.setPos(x, y)
+    def setEndPoint(self, x, y):
+        size=20
+        self.point2.setPos(x, y)
 
 # class EllipseItem(RectHandle):
 #     """ 自定义可变椭圆类"""
