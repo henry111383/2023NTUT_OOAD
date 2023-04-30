@@ -77,7 +77,6 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             elif event.button() == Qt.MiddleButton  and \
                 not self.isOutofScene(Point(self.x, self.y)) :
                 if self.shape == 'linestrip' and self.drawing==True:
-                    self.DrawLineStrip()
                     self.drawing = False
                     self.LabelList.append(self.tempLabel)
         event.accept()

@@ -287,6 +287,10 @@ class MyLineStrip(QGraphicsPathItem):
         self.setBrush(self.brush)
     def setLastPoint(self,x,y):
         self.childItems()[-1].setPos(x,y)
+    def mouseMoveEvent(self, event):
+        for point_item in self.childItems():
+            point_item.setPos(point_item.pos() + event.pos() - event.lastPos())
+        self.updatePath()
     def updatePath(self):
         self.path = QPainterPath()
         for i, point_item in enumerate(self.childItems()):
