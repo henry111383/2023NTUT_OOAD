@@ -3,6 +3,7 @@ from PyQt5.QtCore import QRectF, Qt, QPointF ,QLineF ,QSize
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets
+from typing import List, Tuple
 
 class LabelItem(QGraphicsRectItem):
     PointList = []
@@ -230,9 +231,10 @@ class LinePoint(QGraphicsEllipseItem):
         self.setFlags(QGraphicsEllipseItem.ItemIsMovable | QGraphicsEllipseItem.ItemSendsScenePositionChanges)
 
     def itemChange(self, change, value):
-        if change == QGraphicsEllipseItem.ItemScenePositionHasChanged:
+        if isinstance(self.parentItem(), MyLineStrip) and  change == QGraphicsPathItem.ItemScenePositionHasChanged:
+            self.parentItem().updatePath()
+        elif isinstance(self.parentItem(), MyLineItem) and change == QGraphicsEllipseItem.ItemScenePositionHasChanged:
             self.parentItem().updateLine()
-            print(type(self.parentItem()))
         return super().itemChange(change, value)
                 
 class MyLineItem(QGraphicsLineItem):
@@ -249,12 +251,56 @@ class MyLineItem(QGraphicsLineItem):
         end = self.point2.scenePos()
         self.setLine(start.x(), start.y(), end.x(), end.y())
     def setStartPoint(self, x, y):
-        size=20
         self.point1.setPos(x, y)
     def setEndPoint(self, x, y):
-        size=20
         self.point2.setPos(x, y)
 
+class MyLineStrip(QGraphicsPathItem):
+    def __init__(self, points: List[Tuple[float, float]], parent=None):
+        super().__init__(parent)
+        self.points = points
+        self.path = QPainterPath()
+        self.pen = QPen(QColor(0, 0, 255))
+        self.pen.setWidth(5)
+        self.brush = QBrush(QColor(0, 0, 0, 0))
+        self.initPoints()
+
+    def initPoints(self):
+        for point in self.points:
+            x, y = point
+            point_item = LinePoint(x, y, parent=self)
+            point_item.setFlags(
+                QGraphicsPathItem.ItemIsMovable | QGraphicsPathItem.ItemSendsScenePositionChanges)
+            point_item.setBrush(QBrush(QColor(Qt.red)))
+        self.updatePath()
+    def addPoint(self, point: Tuple[float, float]):
+        # 創建新的點物件，並設定其座標和相關屬性
+        point_item = LinePoint(point[0], point[1], parent=self)
+        point_item.setFlags(QGraphicsPathItem.ItemIsMovable | QGraphicsPathItem.ItemSendsScenePositionChanges)
+        point_item.setBrush(QBrush(QColor(Qt.red)))
+        point_item.setParentItem(self)
+        # 在路徑中加入新的線段
+        self.path.lineTo(point_item.scenePos())
+        # 重新設定筆刷和路徑
+        self.setPath(self.path)
+        self.setPen(self.pen)
+        self.setBrush(self.brush)
+    def setLastPoint(self,x,y):
+        self.childItems()[-1].setPos(x,y)
+    def updatePath(self):
+        self.path = QPainterPath()
+        for i, point_item in enumerate(self.childItems()):
+            pos = point_item.scenePos()
+            if i == 0:
+                self.path.moveTo(pos)
+            else:
+                self.path.lineTo(pos)
+        self.setPath(self.path)
+        self.setPen(self.pen)
+        self.setBrush(self.brush)
+            
+            
+    
 # class EllipseItem(RectHandle):
 #     """ 自定义可变椭圆类"""
 #     def __init__(self, color,width,*args, **kwargs):

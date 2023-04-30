@@ -14,7 +14,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     CreateMode = False
     EditMode   = True
     drawing = False
-    points = None
+    points = []
     tempLabel = None
     LabelList = []
     current = None
@@ -72,6 +72,15 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                     self.LabelList.append(point)
                 elif self.shape == 'line':
                     self.DrawLine()
+                elif self.shape == 'linestrip':
+                    self.DrawLineStrip()
+            elif event.button() == Qt.MiddleButton  and \
+                not self.isOutofScene(Point(self.x, self.y)) :
+                if self.shape == 'linestrip' and self.drawing==True:
+                    self.DrawLineStrip()
+                    self.drawing = False
+                    self.LabelList.append(self.tempLabel)
+        event.accept()
                     
         
 
@@ -85,24 +94,26 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.ShowRectBuffer(pos)
         if self.shape == 'line':
             if self.drawing:
-                self.current.setEndPoint(pos.x(),pos.y())
-                self.current.update()
+                self.tempLabel.setEndPoint(pos.x(),pos.y())
+                self.tempLabel.update()
+        if self.shape == 'linestrip':
+            if self.drawing:
+                self.tempLabel.setLastPoint(pos.x(),pos.y())
+                self.tempLabel.update()
         return
-
-        
-
 
     def isOutofScene(self, pt):
         w, h = self.width(), self.height()
         return not (0 <= pt.GetX() <= w - 1 and 0 <= pt.GetY() <= h - 1)
 
     def resetDrawing(self):
-        self.drawing = False
         if self.points :
             self.points.clear()
-        if self.tempLabel :
-            self.removeItem(self.tempLabel)
-            del self.tempLabel
+        if self.tempLabel:
+            if self.drawing:
+                self.removeItem(self.tempLabel)
+                del self.tempLabel
+        self.drawing = False
         return
         
     def DrawRect(self, pos):
@@ -143,16 +154,27 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         if not self.drawing :
             self.drawing = True
             self.points = [Point(self.x, self.y)]
-            self.current = MyLineItem(self.x, self.y,self.x, self.y)
-            self.addItem(self.current)
+            self.tempLabel = MyLineItem(self.x, self.y,self.x, self.y)
+            self.addItem(self.tempLabel)
             
         else:
             self.drawing = False
 
             self.points.append(Point(self.x, self.y))
-            self.current.setEndPoint(self.x, self.y)
-            self.current.update()
-            self.LabelList.append(self.current)
+            self.tempLabel.setEndPoint(self.x, self.y)
+            self.tempLabel.update()
+            self.LabelList.append(self.tempLabel)
+        return
+    
+    def DrawLineStrip(self):
+        if not self.drawing :
+            self.drawing = True
+            self.tempLabel = MyLineStrip([(self.x, self.y),(self.x, self.y)])
+            self.addItem(self.tempLabel)     
+        else:
+            self.points.append(Point(self.x, self.y))
+            self.tempLabel.addPoint((self.x, self.y))
+            self.tempLabel.updatePath()
         return
 
 class GraphicView(QGraphicsView):
@@ -200,6 +222,7 @@ class GraphicView(QGraphicsView):
             create_rect_option.triggered.connect(lambda: self.scene.ChangeShape("rect"))
             create_point_option.triggered.connect(lambda: self.scene.ChangeShape("point"))
             create_line_option.triggered.connect(lambda: self.scene.ChangeShape("line"))
+            create_linestrip_option.triggered.connect(lambda: self.scene.ChangeShape("linestrip"))
             # =================================
             # Position
 
