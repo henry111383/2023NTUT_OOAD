@@ -16,7 +16,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     drawing = False
     points = []
     tempLabel = None
-    LabelList = []
+    UILabelList = []
     current = None
 
     pen_color=Qt.red    #畫筆顏色
@@ -69,7 +69,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 elif self.shape == 'point':
                     point = MyPointItem(self.x, self.y)
                     self.addItem(point)
-                    self.LabelList.append(point)
+                    self.UILabelList.append(point)
                 elif self.shape == 'line':
                     self.DrawLine()
                 elif self.shape == 'linestrip':
@@ -80,7 +80,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 not self.isOutofScene(Point(self.x, self.y)) :
                 if (self.shape == 'linestrip' or self.shape == "poly")and self.drawing==True:
                     self.drawing = False
-                    self.LabelList.append(self.tempLabel)
+                    self.UILabelList.append(self.tempLabel)
         event.accept()
                     
         
@@ -138,7 +138,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.label_path.addRect(rectangle)
             self.r = RectLabel(self.points, self.pen_color, self.pen_width, rectangle)
             self.addItem(self.r)
-            self.LabelList.append(self.r)
+            self.UILabelList.append(self.r)
         return
 
     def ShowRectBuffer(self, pos):
@@ -163,7 +163,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.points.append(Point(self.x, self.y))
             self.tempLabel.setEndPoint(self.x, self.y)
             self.tempLabel.update()
-            self.LabelList.append(self.tempLabel)
+            self.UILabelList.append(self.tempLabel)
         return
     
     def DrawLineStrip(self):
