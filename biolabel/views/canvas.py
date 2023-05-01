@@ -18,7 +18,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     tempLabel = None
     UILabelList = []
     current = None
-    issueLabelCommand = pyqtSignal(str)
+    issueLabelCommand = pyqtSignal(str, str, str, list) # cmd, name, type, ptlist
 
     pen_color=Qt.red    #畫筆顏色
     pen_width = 5       #畫筆粗細
@@ -68,9 +68,11 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 if self.shape == 'rect':
                     self.DrawRect(pos)
                 elif self.shape == 'point':
+                    self.points = Point(self.x, self.y) # done
                     point = MyPointItem(self.x, self.y)
                     self.addItem(point)
                     self.UILabelList.append(point)
+                    # self.issueLabelCommand.emit("CreateLabel()", "point", )
                 elif self.shape == 'line':
                     self.DrawLine()
                 elif self.shape == 'linestrip':
@@ -81,7 +83,8 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 not self.isOutofScene(Point(self.x, self.y)) :
                 if (self.shape == 'linestrip' or self.shape == "poly")and self.drawing==True:
                     self.drawing = False
-                    self.UILabelList.append(self.tempLabel)
+                    self.UILabelList.append(self.tempLabel) # points done
+                    # self.issueLabelCommand.emit("CreateLabel()")
         # event.accept()
                     
         
@@ -93,7 +96,6 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         self.wy = pos.y()
         if self.CreateMode:
             if self.shape == 'rect':
-                # self.ShowRectBuffer(pos)
                 if self.drawing:
                     self.tempLabel.setEndPoint(pos.x(),pos.y())
                     self.tempLabel.updatePath()
@@ -113,7 +115,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
 
     def resetDrawing(self):
         if self.points :
-            self.points.clear()
+            self.points.clear() # clear
         if self.tempLabel:
             if self.drawing:
                 self.removeItem(self.tempLabel)
@@ -122,75 +124,43 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         return
         
     def DrawRect(self, pos):
-        # if not self.drawing :
-        #     self.drawing = True
-        #     self.points = [Point(self.x, self.y)]
-
-        #     self.label_path = QPainterPath()
-        #     self.label_path.moveTo(pos)
-
-        #     # 緩衝用
-        #     rectangle = getAccurateRect(self.points[0], Point(self.x+0.01, self.y+0.01))
-        #     self.tempLabel = RectLabel(self.points, self.pen_color, self.pen_width, rectangle)
-        #     self.addItem(self.tempLabel)
-            
-        # else:
-        #     self.drawing = False
-        #     self.removeItem(self.tempLabel)
-        #     del self.tempLabel
-        #     self.points.append(Point(self.x, self.y))
-        #     rectangle = getAccurateRect(self.points[0], self.points[1])
-        #     self.label_path.addRect(rectangle)
-        #     self.r = RectLabel(self.points, self.pen_color, self.pen_width, rectangle)
-        #     self.addItem(self.r)
-        #     self.UILabelList.append(self.r)
-        #     self.issueLabelCommand.emit("CreateLabel()")
-        # return
         if not self.drawing :
             self.drawing = True
-            self.points = [Point(self.x, self.y)]
+            self.points = [Point(self.x, self.y)] # init
             self.tempLabel = MyRectItem(self.x, self.y, self.x, self.y)
             self.addItem(self.tempLabel)
             
         else:
             self.drawing = False
 
-            self.points.append(Point(self.x, self.y))
+            self.points.append(Point(self.x, self.y)) # done
             self.tempLabel.setEndPoint(self.x, self.y)
             self.tempLabel.update()
             self.UILabelList.append(self.tempLabel)
+            # self.issueLabelCommand.emit("CreateLabel()")
         return
-
-    # def ShowRectBuffer(self, pos):
-    #     if self.drawing:
-    #         self.w = pos.x()-self.x
-    #         self.h = pos.y()-self.y
-    #         rectangle = getAccurateRect(self.points[0], Point(self.wx, self.wy))
-    #         if rectangle :
-    #             self.tempLabel.setRect(rectangle)
-    #     return
 
     def DrawLine(self):
         if not self.drawing :
             self.drawing = True
-            self.points = [Point(self.x, self.y)]
+            self.points = [Point(self.x, self.y)] # init
             self.tempLabel = MyLineItem(self.x, self.y,self.x, self.y)
             self.addItem(self.tempLabel)
             
         else:
             self.drawing = False
-
-            self.points.append(Point(self.x, self.y))
+            self.points.append(Point(self.x, self.y)) # done
             self.tempLabel.setEndPoint(self.x, self.y)
             self.tempLabel.update()
             self.UILabelList.append(self.tempLabel)
+            # self.issueLabelCommand.emit("CreateLabel()")
         return
     
     def DrawLineStrip(self):
         if not self.drawing :
             self.drawing = True
+            self.points = [Point(self.x, self.y)] # init
             if self.shape=="poly":
-                print("HHH")
                 self.tempLabel = MyLineStrip([(self.x, self.y),(self.x, self.y)], shape="poly")
             else:
                 self.tempLabel = MyLineStrip([(self.x, self.y),(self.x, self.y)])

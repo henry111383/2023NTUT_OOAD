@@ -6,7 +6,7 @@ from PyQt5 import QtWidgets
 from typing import List, Tuple
 
 class LabelItem(QGraphicsRectItem):
-    PointList = []
+    label = None
 
 
 
@@ -71,7 +71,7 @@ class LinePoint(QGraphicsEllipseItem, LabelItem):
                 self.parentItem().updatePath()
         return super().itemChange(change, value)
                
-class MyRectItem(QGraphicsPathItem):
+class MyRectItem(QGraphicsPathItem, LabelItem):
     EditMode = False
     def __init__(self, x1, y1, x2, y2,parent=None):
         super().__init__(parent)
@@ -128,7 +128,7 @@ class MyRectItem(QGraphicsPathItem):
             for i, point_item in enumerate(self.childItems()) :
                 point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
                 
-class MyLineItem(QGraphicsLineItem):
+class MyLineItem(QGraphicsLineItem, LabelItem):
     EditMode = False
     def __init__(self, x1, y1, x2, y2,parent=None):
         super().__init__(x1, y1, x2, y2, parent)
@@ -170,7 +170,7 @@ class MyLineItem(QGraphicsLineItem):
             for i, point_item in enumerate(self.childItems()) :
                 point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
 
-class MyLineStrip(QGraphicsPathItem):
+class MyLineStrip(QGraphicsPathItem, LabelItem):
     EditMode = False
     def __init__(self, points: List[Tuple[float, float]], shape="linestrip", parent=None):
         super().__init__(parent)
