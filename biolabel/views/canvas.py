@@ -74,15 +74,16 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                     self.DrawLine()
                 elif self.shape == 'linestrip':
                     self.DrawLineStrip()
+                elif self.shape == 'poly':
+                    self.DrawLineStrip()
             elif event.button() == Qt.MiddleButton  and \
                 not self.isOutofScene(Point(self.x, self.y)) :
-                if self.shape == 'linestrip' and self.drawing==True:
+                if (self.shape == 'linestrip' or self.shape == "poly")and self.drawing==True:
                     self.drawing = False
                     self.LabelList.append(self.tempLabel)
         event.accept()
                     
         
-
     def mouseMoveEvent(self, event):
         # 滑鼠移動事件
         super(MyScene, self).mouseMoveEvent(event)
@@ -95,7 +96,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             if self.drawing:
                 self.tempLabel.setEndPoint(pos.x(),pos.y())
                 self.tempLabel.update()
-        if self.shape == 'linestrip':
+        if self.shape == 'linestrip' or self.shape == "poly":
             if self.drawing:
                 self.tempLabel.setLastPoint(pos.x(),pos.y())
                 self.tempLabel.update()
@@ -170,6 +171,8 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.drawing = True
             self.tempLabel = MyLineStrip([(self.x, self.y),(self.x, self.y)])
             self.addItem(self.tempLabel)     
+            if self.shape=="poly":
+                self.tempLabel.setShape(self.shape)
         else:
             self.points.append(Point(self.x, self.y))
             self.tempLabel.addPoint((self.x, self.y))

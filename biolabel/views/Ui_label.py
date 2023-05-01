@@ -259,6 +259,7 @@ class MyLineStrip(QGraphicsPathItem):
     def __init__(self, points: List[Tuple[float, float]], parent=None):
         super().__init__(parent)
         self.points = points
+        self.shape = "linestrip"
         self.path = QPainterPath()
         self.pen = QPen(QColor(0, 0, 255))
         self.pen.setWidth(5)
@@ -291,6 +292,8 @@ class MyLineStrip(QGraphicsPathItem):
         for point_item in self.childItems():
             point_item.setPos(point_item.pos() + event.pos() - event.lastPos())
         self.updatePath()
+    def setShape(self,shape : str):
+        self.shape=shape
     def updatePath(self):
         self.path = QPainterPath()
         for i, point_item in enumerate(self.childItems()):
@@ -299,6 +302,8 @@ class MyLineStrip(QGraphicsPathItem):
                 self.path.moveTo(pos)
             else:
                 self.path.lineTo(pos)
+        if self.shape == "poly": 
+            self.path.closeSubpath()
         self.setPath(self.path)
         self.setPen(self.pen)
         self.setBrush(self.brush)
