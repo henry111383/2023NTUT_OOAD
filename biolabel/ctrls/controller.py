@@ -35,6 +35,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.actionCreateLabel.triggered.connect(self.Click_CreateLabel)
         self.ui.actionEditLabel.triggered.connect(self.Click_EditLabel)
         self.ui.actionDIP.triggered.connect(self.Click_DIP)
+
+        # issueLabelCommand
+        self.ui.canvas.scene.issueLabelCommand.connect(self.issueLabelCommand)
         
 
     def changeshape(self,shape):
@@ -142,3 +145,5 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         else:
             self.ui.canvas.setCursor(CURSOR_DEFAULT)
 
+    def issueLabelCommand(sefl, str):
+        print(f"labelService.{str}")
