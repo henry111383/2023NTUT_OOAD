@@ -8,7 +8,9 @@ from typing import List, Tuple
 class LabelItem(QGraphicsRectItem):
     PointList = []
 
-class MyPointItem(QGraphicsEllipseItem):
+
+
+class MyPointItem(QGraphicsEllipseItem, LabelItem):
     # 讓鼠標能圈選的模式
     EditMode = False
     def __init__(self, x, y, radius=5, parent=None):
@@ -50,7 +52,7 @@ class MyPointItem(QGraphicsEllipseItem):
             self.setPos(pos)
 
 
-class LinePoint(QGraphicsEllipseItem):
+class LinePoint(QGraphicsEllipseItem, LabelItem):
     EditMode = False
     def __init__(self, x, y, radius=5, parent=None):
         super().__init__(parent)
