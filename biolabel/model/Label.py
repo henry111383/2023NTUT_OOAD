@@ -13,8 +13,9 @@ class Label():
         return
     
     def RemovePoint(self, index):
-        if len(self.__ptList) > index:
-            del self.__ptList[index]
+        if index :
+            if len(self.__ptList) > index:
+                del self.__ptList[index]
         return
     
     def UpdatePoint(self, index, pt):
