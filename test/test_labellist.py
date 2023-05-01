@@ -3,8 +3,8 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 from biolabel.Model.point import *
-# from biolabel.views.Ui_label import *
 from biolabel.Model.Label import *
+from biolabel.Model.LabelList import *
 
 class Label_RectLabelShouldBeCorrect(unittest.TestCase):
     def setUp(self):
