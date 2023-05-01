@@ -118,7 +118,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # change QGraphicsItem selectable
     def ChangeLabelSelectable(self, scene):
         if scene.EditMode :
-            for item in scene.LabelList:
+            for item in scene.UILabelList:
                 item.setFlag(QGraphicsItem.ItemIsSelectable, True)
                 item.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
                 item.setFlag(QGraphicsItem.ItemIsFocusable, True)
@@ -126,7 +126,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 item.EditMode = True
                 
         else:
-            for item in scene.LabelList:
+            for item in scene.UILabelList:
                 item.setFlag(QGraphicsItem.ItemIsSelectable, False)
                 item.setFlag(QGraphicsItem.ItemSendsGeometryChanges, False)
                 item.setFlag(QGraphicsItem.ItemIsFocusable, False)

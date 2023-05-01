@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIco
 from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets
 import cv2
-from Model.point import Point
+from model.point import Point
 from utils.rect import getAccurateRect
 from .Ui_label import *
 
