@@ -7,5 +7,8 @@ class LabelService():
     def isCreateLabel(self, name, type, ptList)->Label:
         self.NameList.add(name)
         return Label(name, type, ptList)
+    # def moveLabel(self, name, type, ptList,parentLabel)->Label:
+    #     if parentLabel
+    #     return Label(name, type, ptList)
     
     

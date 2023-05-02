@@ -167,6 +167,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.LabelNameDialog.LabelNameList.addItem(item)
             
     def LabelNameDialogShow(self):
+        self.templabelName = ""
         self.LabelNameDialog.exec_()
 
     def LabelNameAccept(self, str):
@@ -178,8 +179,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     # Call LabelService
     def issueLabelCommand(self, cmd, type, ptList):
-        if cmd == 'CreateLabel':
+        if cmd == 'CreateLabel' and len(self.templabelName) !=0:
             new_label = self.labelServeice.isCreateLabel(self.templabelName, type, ptList) # 創建一個Label
             self.ui.canvas.scene.tempLabel.label = new_label # 每個UILabel對應一個Label
             self.labelList.AddLabel(new_label) # 加入labelList
             print(f"成功！目前有這些：{[x.GetName() for x in self.labelList.GetLabelList()]}")
+        else:
+            # LabelName為空則不創建Label
+            self.ui.canvas.scene.drawing = True
