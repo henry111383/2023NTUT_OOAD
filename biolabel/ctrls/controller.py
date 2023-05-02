@@ -63,12 +63,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # === DIP 選單 ===
         self.DIPmenu = QtWidgets.QMenu()
         # Add menu options
-        DIP_RGB2Gray = self.DIPmenu.addAction('RGBtoGRAY')
-        DIP_OTSUbinary = self.DIPmenu.addAction('RGBtoBINARY')
-        DIP_RGB2Hematoxylin = self.DIPmenu.addAction('RBGtoHematoxylin')
-        DIP_RGB2Eosin = self.DIPmenu.addAction('RGBtoEosin')
-        DIP_RGB2Dab = self.DIPmenu.addAction('RGBtoDab')
+        DIP_RGB2Gray = self.DIPmenu.addAction('GRAY')
+        DIP_OTSUbinary = self.DIPmenu.addAction('BINARY')
+        DIP_RGB2Hematoxylin = self.DIPmenu.addAction('Hematoxylin')
+        DIP_RGB2Eosin = self.DIPmenu.addAction('Eosin')
+        DIP_RGB2Dab = self.DIPmenu.addAction('Dab')
+        self.DIPmenu.addSeparator()
         DIP_Back2Original = self.DIPmenu.addAction('Original Image')
+        
         # Menu option events
         DIP_RGB2Gray.triggered.connect(lambda: self.issueImageProcessCommand('RGB2Gray'))
         DIP_OTSUbinary.triggered.connect(lambda: self.issueImageProcessCommand('OTSUbinary'))
@@ -84,30 +86,33 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     # === toolBotton action : Create Label ===
     def Click_CreateLabel(self):
-        self.ui.canvas.scene.CreateMode = True
-        self.ui.toolButton_CreateLabel.setStyleSheet\
-            ("background-color: {}".format(QColor(Qt.darkGray).name()))
-        self.ui.canvas.scene.EditMode   = False
-        self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
-        self.StatusBarText('Mode : CreateLabel')
-        self.ChangeLabelSelectable(self.ui.canvas.scene)
-        self.CheckCursorStyle()
+        if self.ui.canvas.scene.ImgLoad :
+            self.ui.canvas.scene.CreateMode = True
+            self.ui.toolButton_CreateLabel.setStyleSheet\
+                ("background-color: {}".format(QColor(Qt.darkGray).name()))
+            self.ui.canvas.scene.EditMode   = False
+            self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
+            self.StatusBarText('Mode : CreateLabel')
+            self.ChangeLabelSelectable(self.ui.canvas.scene)
+            self.CheckCursorStyle()
         
     # === toolBotton action : Edit Label ===    
     def Click_EditLabel(self):
-        self.ui.canvas.scene.CreateMode = False
-        self.ui.toolButton_CreateLabel.setStyleSheet("background-color: auto")
-        self.ui.canvas.scene.EditMode   = True
-        self.ui.toolButton_EditLabel.setStyleSheet\
-            ("background-color: {}".format(QColor(Qt.darkGray).name()))
-        self.StatusBarText('Mode : EditLabel')
-        self.ChangeLabelSelectable(self.ui.canvas.scene)
-        self.CheckCursorStyle()
+        if self.ui.canvas.scene.ImgLoad :
+            self.ui.canvas.scene.CreateMode = False
+            self.ui.toolButton_CreateLabel.setStyleSheet("background-color: auto")
+            self.ui.canvas.scene.EditMode   = True
+            self.ui.toolButton_EditLabel.setStyleSheet\
+                ("background-color: {}".format(QColor(Qt.darkGray).name()))
+            self.StatusBarText('Mode : EditLabel')
+            self.ChangeLabelSelectable(self.ui.canvas.scene)
+            self.CheckCursorStyle()
 
     # === toolBotton action : DIP ===
     def Click_DIP(self):
-        self.DIPmenu.exec_(QCursor.pos())
-        # print('You click the DIP button')
+        if self.ui.canvas.scene.ImgLoad :
+            self.DIPmenu.exec_(QCursor.pos())
+        
 
     # === MenuBar action : OpenFile ===
     def open_file(self):
@@ -237,7 +242,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             pix = QPixmap.fromImage(qImg)
             self.imgItem.setPixmap(pix)
             
-
         else:
             self.current_img = eval(f'self.imageProcessService.{str}(self.original_img)')
             img = self.current_img.GetImg()
