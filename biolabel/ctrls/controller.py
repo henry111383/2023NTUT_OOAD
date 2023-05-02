@@ -7,6 +7,7 @@ from views.LabelNameDialog import LabelName_Dialog
 from views.canvas import *
 import cv2
 from model.LabelService import LabelService
+from model.ImageProcessService import ImageProcessService
 from model.LabelList import LabelList
 
 CURSOR_DEFAULT = QtCore.Qt.ArrowCursor
@@ -23,13 +24,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     LabelNameList = []
 
     def __init__(self):
-        super().__init__() # in python3, super(Class, self).xxx = super().xxx
+        super().__init__() 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.LabelNameDialog = LabelName_Dialog()
 
         self.setup_control()
-        self.labelServeice = LabelService()
+        self.labelService = LabelService()
+        self.imageProcessService = ImageProcessService()
         self.labelList = LabelList()
         self.templabelName = ""
         
@@ -81,7 +83,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     # === toolBotton action : DIP ===
     def Click_DIP(self):
-        self.show_labelname_dialog()
         print('You click the DIP button')
 
     # === MenuBar action : OpenFile ===
@@ -191,7 +192,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # Call LabelService
     def issueLabelCommand(self, cmd, type, ptList):
         if cmd == 'CreateLabel' and len(self.templabelName) !=0:
-            new_label = self.labelServeice.isCreateLabel(self.templabelName, type, ptList) # 創建一個Label
+            new_label = self.labelService.isCreateLabel(self.templabelName, type, ptList) # 創建一個Label
             self.ui.canvas.scene.tempLabel.label = new_label # 每個UILabel對應一個Label
             self.labelList.AddLabel(new_label) # 加入labelList
             print(f"成功！目前有這些：{[x.GetName() for x in self.labelList.GetLabelList()]}")

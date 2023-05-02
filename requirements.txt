@@ -2,3 +2,7 @@
 # conda install -c conda-forge opencv
 imgviz
 natsort
+scikit-image
+cv2
+numpy
+pandasy

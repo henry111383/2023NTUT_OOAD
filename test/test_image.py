@@ -1,7 +1,6 @@
 import unittest
 import os, sys
 import cv2
-import matplotlib.pyplot as plt
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 from biolabel.model.Image import *
@@ -41,6 +40,12 @@ class Image_ImageShouldBeCorrect(unittest.TestCase):
         result = self.img1.GetSize()
         self.assertEqual(expected, result)
     
+    def test_Image_SetChannel(self):
+        expected = 'HED'
+        self.img1.SetChannel('HED')
+        result = self.img1.GetChannel()
+        self.assertEqual(expected, result)
+
     def test_Image_GetChannel(self):
         expected = 'RGB'
         result = self.img1.GetChannel()

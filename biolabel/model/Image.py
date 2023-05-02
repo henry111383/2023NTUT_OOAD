@@ -24,7 +24,11 @@ class Image():
     def GetSize(self):
         return self.__Size
     
+    def SetChannel(self, str):
+        self.__Channel = str
+
     def GetChannel(self):
         return self.__Channel
+    
     
 
