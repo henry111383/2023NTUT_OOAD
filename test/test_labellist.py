@@ -1,10 +1,11 @@
-from biolabel.model.LabelList import *
-from biolabel.model.Label import *
-from biolabel.model.point import *
 import unittest
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+
+from biolabel.model.LabelList import *
+from biolabel.model.Label import *
+from biolabel.model.Point import *
 
 
 class LabelListTest(unittest.TestCase):
