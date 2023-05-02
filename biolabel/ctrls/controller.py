@@ -1,14 +1,18 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsPixmapItem,QDialog
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap, QCursor
 
 from views.Ui_MainWindow import Ui_MainWindow
 from views.LabelNameDialog import LabelName_Dialog
 from views.canvas import *
+import numpy as np
 import cv2
 from model.LabelService import LabelService
 from model.ImageProcessService import ImageProcessService
 from model.LabelList import LabelList
+from model.Image import Image
+
+import matplotlib.pyplot as plt
 
 CURSOR_DEFAULT = QtCore.Qt.ArrowCursor
 CURSOR_POINT = QtCore.Qt.PointingHandCursor
@@ -19,8 +23,9 @@ CURSOR_GRAB = QtCore.Qt.OpenHandCursor
 class MainWindow_controller(QtWidgets.QMainWindow):
      
     current_file = []
-    img = []
-    qImg = []
+    original_img = None
+    current_img = None
+    imgItem = None
     LabelNameList = []
 
     def __init__(self):
@@ -54,6 +59,24 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         #LabelNameDialogButton
         self.LabelNameDialog.AddLabelName.connect(self.LabelNameAccept)
+
+        # === DIP 選單 ===
+        self.DIPmenu = QtWidgets.QMenu()
+        # Add menu options
+        DIP_RGB2Gray = self.DIPmenu.addAction('RGBtoGRAY')
+        DIP_OTSUbinary = self.DIPmenu.addAction('RGBtoBINARY')
+        DIP_RGB2Hematoxylin = self.DIPmenu.addAction('RBGtoHematoxylin')
+        DIP_RGB2Eosin = self.DIPmenu.addAction('RGBtoEosin')
+        DIP_RGB2Dab = self.DIPmenu.addAction('RGBtoDab')
+        DIP_Back2Original = self.DIPmenu.addAction('Original Image')
+        # Menu option events
+        DIP_RGB2Gray.triggered.connect(lambda: self.issueImageProcessCommand('RGB2Gray'))
+        DIP_OTSUbinary.triggered.connect(lambda: self.issueImageProcessCommand('OTSUbinary'))
+        DIP_RGB2Hematoxylin.triggered.connect(lambda: self.issueImageProcessCommand('RGB2Hematoxylin'))
+        DIP_RGB2Eosin.triggered.connect(lambda: self.issueImageProcessCommand('RGB2Eosin'))
+        DIP_RGB2Dab.triggered.connect(lambda: self.issueImageProcessCommand('RGB2Dab'))
+        DIP_Back2Original.triggered.connect(lambda: self.issueImageProcessCommand('Back2Original'))
+        # =================================
         
 
     def changeshape(self,shape):
@@ -83,7 +106,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     # === toolBotton action : DIP ===
     def Click_DIP(self):
-        print('You click the DIP button')
+        self.DIPmenu.exec_(QCursor.pos())
+        # print('You click the DIP button')
 
     # === MenuBar action : OpenFile ===
     def open_file(self):
@@ -91,7 +115,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         print(self.current_file, filetype)
         if self.current_file :
             self.resetMode()
-            self.read_img_to_view()
+            self.read_img_to_view(self.current_file)
             self.ui.canvas.scene.ImgLoad = True
 
     # === MenuBar action :OpenDir ===
@@ -111,21 +135,22 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
 
     # read image to view
-    def read_img_to_view(self):
+    def read_img_to_view(self, imgFile):
         # read image
-        self.img = cv2.imread(self.current_file)
+        img = cv2.cvtColor(cv2.imread(imgFile), cv2.COLOR_BGR2RGB)
+        # create Image instance
+        self.original_img = Image(img, channel='RGB', imageName='Original')
         # reset the view
         self.ui.canvas.scene.clear()
         # get size of image
-        height, width, channel = self.img.shape
+        h, w, _ = img.shape
         # set QImage
-        self.qImg = QImage(self.current_file)
+        qImg = QImage(img, w, h, 3 * w, QImage.Format_RGB888)
         # set QPixmanp
-        pix = QPixmap.fromImage(self.qImg)
-        item = QGraphicsPixmapItem(pix)
-        self.ui.canvas.scene.setSceneRect(QRectF(0, 0, width, height))
-        self.ui.canvas.scene.addItem(item)
-
+        pix = QPixmap.fromImage(qImg)
+        self.imgItem = QGraphicsPixmapItem(pix)
+        self.ui.canvas.scene.setSceneRect(QRectF(0, 0, w, h))
+        self.ui.canvas.scene.addItem(self.imgItem)
         self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
         return
     
@@ -199,4 +224,36 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         else:
             # LabelName為空則不創建Label
             self.ui.canvas.scene.drawing = True
-            
+
+
+    # Call DIPService
+    def issueImageProcessCommand(self, str):
+        if str == 'Back2Original':
+            # 刪掉原始的圖片
+            self.ui.canvas.scene.removeItem(self.imgItem)
+            # get size of image
+            h, w, _ = self.original_img.GetImg().shape
+            # set QImage
+            qImg = QImage(self.original_img.GetImg(), w, h, 3 * w, QImage.Format_RGB888)
+            # set QPixmanp
+            pix = QPixmap.fromImage(qImg)
+            self.imgItem = QGraphicsPixmapItem(pix)
+            self.ui.canvas.scene.setSceneRect(QRectF(0, 0, w, h))
+            self.ui.canvas.scene.addItem(self.imgItem)
+
+        else:
+            self.current_img = eval(f'self.imageProcessService.{str}(self.original_img)')
+            img = self.current_img.GetImg()
+            # 刪掉原始的圖片
+            self.ui.canvas.scene.removeItem(self.imgItem)
+            # get size of image
+            h, w, _ = img.shape
+            # set QImage
+            qImg = QImage(img, w, h, 3 * w, QImage.Format_RGB888)
+            # set QPixmanp
+            pix = QPixmap.fromImage(qImg)
+            self.imgItem = QGraphicsPixmapItem(pix)
+            self.ui.canvas.scene.setSceneRect(QRectF(0, 0, w, h))
+            self.ui.canvas.scene.addItem(self.imgItem)
+            self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
+                
