@@ -1,8 +1,8 @@
 import numpy as np
 
 class Image():
-    def __init__(self, value=[], channel=None, imageName=None):
-        self.__Value = np.ndarray(value)
+    def __init__(self, value=np.ndarray([]), channel=None, imageName=None):
+        self.__Value = value
         self.__Size = np.shape(self.__Value)
         self.__Channel = channel
         self.__ImageName = imageName

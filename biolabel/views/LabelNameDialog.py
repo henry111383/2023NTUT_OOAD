@@ -64,7 +64,7 @@ class LabelName_Dialog(QtWidgets.QDialog):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Input the Label Name", "Input the Label Name"))
-        # self.LabelNameList.itemClicked.connect(self.show_message)
+        self.LabelNameList.itemClicked.connect(self.SetLabelName)
 
     def accept(self):
         new_LabelName =self.textEdit.toPlainText()
