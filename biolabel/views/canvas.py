@@ -68,11 +68,11 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 if self.shape == 'rect':
                     self.DrawRect(pos)
                 elif self.shape == 'point':
-                    self.points = Point(self.x, self.y) # done
+                    self.points = [Point(self.x, self.y)] # done
                     point = MyPointItem(self.x, self.y)
                     self.addItem(point)
                     self.UILabelList.append(point)
-                    # self.issueLabelCommand.emit("CreateLabel()", "point", )
+                    self.issueLabelCommand.emit("CreateLabel", "Test", self.shape, self.points) ###
                 elif self.shape == 'line':
                     self.DrawLine()
                 elif self.shape == 'linestrip':
@@ -84,7 +84,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 if (self.shape == 'linestrip' or self.shape == "poly")and self.drawing==True:
                     self.drawing = False
                     self.UILabelList.append(self.tempLabel) # points done
-                    # self.issueLabelCommand.emit("CreateLabel()")
+                    self.issueLabelCommand.emit("CreateLabel", "Test", self.shape, self.points) ###
         # event.accept()
                     
         
@@ -137,7 +137,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.tempLabel.setEndPoint(self.x, self.y)
             self.tempLabel.update()
             self.UILabelList.append(self.tempLabel)
-            # self.issueLabelCommand.emit("CreateLabel()")
+            self.issueLabelCommand.emit("CreateLabel", "Test", self.shape, self.points) ###
         return
 
     def DrawLine(self):
@@ -153,7 +153,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.tempLabel.setEndPoint(self.x, self.y)
             self.tempLabel.update()
             self.UILabelList.append(self.tempLabel)
-            # self.issueLabelCommand.emit("CreateLabel()")
+            self.issueLabelCommand.emit("CreateLabel", "Test", self.shape, self.points) ###
         return
     
     def DrawLineStrip(self):
