@@ -64,7 +64,8 @@ class LabelName_Dialog(QtWidgets.QDialog):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
-        self.LabelNameList.itemClicked.connect(self.show_message)
+        # self.LabelNameList.itemClicked.connect(self.show_message)
+
     def accept(self):
         new_LabelName =self.textEdit.toPlainText()
         # 若輸入的LabelName為空且不重複則加入LabelNameList
@@ -72,9 +73,11 @@ class LabelName_Dialog(QtWidgets.QDialog):
             self.AddLabelName.emit(new_LabelName)
         self.textEdit.clear()
         super().accept()
+
     def reject(self):
         self.textEdit.clear()
         super().reject()
+        
     # 根據點擊的Item將相對應內容設置到textEdit
     def SetLabelName(self,item):
         self.textEdit.setText(item.text())

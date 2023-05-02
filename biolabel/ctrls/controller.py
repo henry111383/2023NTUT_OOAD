@@ -6,6 +6,8 @@ from views.Ui_MainWindow import Ui_MainWindow
 from views.LabelNameDialog import LabelName_Dialog
 from views.canvas import *
 import cv2
+from model.LabelService import LabelService
+from model.LabelList import LabelList
 
 CURSOR_DEFAULT = QtCore.Qt.ArrowCursor
 CURSOR_POINT = QtCore.Qt.PointingHandCursor
@@ -27,6 +29,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.LabelNameDialog = LabelName_Dialog()
 
         self.setup_control()
+        self.labelServeice = LabelService()
+        self.labelList = LabelList()
         
 
     def setup_control(self):
@@ -154,16 +158,23 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ui.canvas.setCursor(CURSOR_GRAB)
         else:
             self.ui.canvas.setCursor(CURSOR_DEFAULT)
+            
     def SetLabelNameList(self):
         for item in self.LabelNameList:
             self.ui.LabelNameList.addItem(item)
         for item in self.LabelNameList:
             self.LabelNameDialog.LabelNameList.addItem(item)
 
-    def issueLabelCommand(sefl, str):
-        print(f"labelService.{str}")
+    def issueLabelCommand(self, cmd, name, type, ptList):
+        if cmd == 'CreateLabel':
+            new_label = self.labelServeice.isCreateLabel(name, type, ptList) # 創建一個Label
+            self.ui.canvas.scene.tempLabel.label = new_label # 每個UILabel對應一個Label
+            self.labelList.AddLabel(new_label) # 加入labelList
+            print(f"成功！有這些：{self.labelList.GetLabelList()}")
+            
     def LabelNameDialogShow(self):
         self.LabelNameDialog.exec_()
+
     def LabelNameAccept(self,str):
         if self.LabelNameList.count(str) == 0:
             self.LabelNameList.append(str)
