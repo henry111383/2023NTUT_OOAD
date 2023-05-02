@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets
 from typing import List, Tuple
 
-class LabelItem(QGraphicsRectItem):
+class LabelItem():
     label = None
 
 
