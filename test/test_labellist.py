@@ -1,6 +1,6 @@
 from biolabel.model.LabelList import *
 from biolabel.model.Label import *
-from biolabel.model.point import *
+from biolabel.model.Point import *
 import unittest
 import os
 import sys
