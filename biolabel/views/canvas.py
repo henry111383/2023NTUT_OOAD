@@ -20,6 +20,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     current = None
     issueLabelCommand = pyqtSignal(str, str, list) # cmd, type, ptlist
     issueLabelNameDialogShow = pyqtSignal() 
+    inputLabelNameSuccess = False
 
     pen_color=Qt.red    #畫筆顏色
     pen_width = 5       #畫筆粗細
@@ -70,11 +71,16 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                     self.DrawRect(pos)
                 elif self.shape == 'point':
                     self.points = [Point(self.x, self.y)] # done
-                    point = MyPointItem(self.x, self.y)
-                    self.addItem(point)
+                    self.tempLabel = MyPointItem(self.x, self.y)
+                    self.addItem(self.tempLabel)
                     self.issueLabelNameDialogShow.emit()
-                    self.UILabelList.append(point)
-                    self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+                    print(self.inputLabelNameSuccess)
+                    if self.inputLabelNameSuccess :
+                        self.UILabelList.append(self.tempLabel)
+                        self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+                    else:
+                        self.removeItem(self.tempLabel)
+                        del self.tempLabel
                 elif self.shape == 'line':
                     self.DrawLine()
                 elif self.shape == 'linestrip':

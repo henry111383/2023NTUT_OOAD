@@ -14,6 +14,8 @@ class Label_RectLabelShouldBeCorrect(unittest.TestCase):
         self.E = Point(100,100)
         self.RectLabel1 = Label('RectLabel1', 'rect' ,[self.A, self.B])
         self.RectLabel2 = Label('RectLabel2', 'rect',[self.C, self.D])
+        # self.RectLabel3 = Label('RectLabel2', 'point',[self.C])
+        # self.RectLabel4 = Label('RectLabel2', 'point',[self.C])
         
 
     def tearDown(self):

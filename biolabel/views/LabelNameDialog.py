@@ -69,13 +69,13 @@ class LabelName_Dialog(QtWidgets.QDialog):
     def accept(self):
         new_LabelName =self.textEdit.toPlainText()
         # 若輸入的LabelName為空且不重複則加入LabelNameList
-        if (len(new_LabelName) != 0):
-            self.AddLabelName.emit(new_LabelName)
+        self.AddLabelName.emit(new_LabelName)
         self.textEdit.clear()
         super().accept()
 
     def reject(self):
         self.textEdit.clear()
+        self.AddLabelName.emit('')
         super().reject()
         
     # 根據點擊的Item將相對應內容設置到textEdit
