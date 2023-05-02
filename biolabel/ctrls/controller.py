@@ -229,31 +229,22 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # Call DIPService
     def issueImageProcessCommand(self, str):
         if str == 'Back2Original':
-            # 刪掉原始的圖片
-            self.ui.canvas.scene.removeItem(self.imgItem)
             # get size of image
             h, w, _ = self.original_img.GetImg().shape
             # set QImage
             qImg = QImage(self.original_img.GetImg(), w, h, 3 * w, QImage.Format_RGB888)
             # set QPixmanp
             pix = QPixmap.fromImage(qImg)
-            self.imgItem = QGraphicsPixmapItem(pix)
-            self.ui.canvas.scene.setSceneRect(QRectF(0, 0, w, h))
-            self.ui.canvas.scene.addItem(self.imgItem)
+            self.imgItem.setPixmap(pix)
+            
 
         else:
             self.current_img = eval(f'self.imageProcessService.{str}(self.original_img)')
             img = self.current_img.GetImg()
-            # 刪掉原始的圖片
-            self.ui.canvas.scene.removeItem(self.imgItem)
             # get size of image
             h, w, _ = img.shape
             # set QImage
             qImg = QImage(img, w, h, 3 * w, QImage.Format_RGB888)
             # set QPixmanp
             pix = QPixmap.fromImage(qImg)
-            self.imgItem = QGraphicsPixmapItem(pix)
-            self.ui.canvas.scene.setSceneRect(QRectF(0, 0, w, h))
-            self.ui.canvas.scene.addItem(self.imgItem)
-            self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
-                
+            self.imgItem.setPixmap(pix)
