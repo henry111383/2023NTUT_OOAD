@@ -15,8 +15,11 @@ class ImageProcessService_ImageProcessServiceShouldBeCorrect(unittest.TestCase):
         self.temp = cv2.cvtColor(cv2.imread('IHC.png'), cv2.COLOR_BGR2RGB)
         self.imageProcessService = ImageProcessService()
         self.img1 = Image(value=self.temp, channel='RGB', imageName='Test') 
-        self.tempGray = cv2.cvtColor(cv2.imread('IHC.png'), cv2.COLOR_BGR2GRAY)
+        value = cv2.cvtColor(cv2.imread('IHC.png'), cv2.COLOR_BGR2GRAY)
+        self.tempGray = np.stack((value, value, value), axis=-1)
         self.img2 = Image(value=self.tempGray, channel='gray', imageName='Test') 
+        Bin_value = cv2.threshold(value, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+        self.tempBin = np.stack((Bin_value, Bin_value, Bin_value), axis=-1)
         null = np.zeros_like(self.temp[:, :, 0])
         self.HED = skimage.color.rgb2hed(self.temp)
         self.tempH = skimage.color.hed2rgb(np.stack((self.HED[:, :, 0], null, null), axis=-1))
@@ -39,7 +42,7 @@ class ImageProcessService_ImageProcessServiceShouldBeCorrect(unittest.TestCase):
 
 
     def test_ImageProcessService_OTSUbinary(self):
-        expected = cv2.threshold(self.tempGray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+        expected = self.tempBin
         processed_img = self.imageProcessService.OTSUbinary(self.img2)
         result = processed_img.GetImg()
         self.assertEqual(expected.all(), result.all())
