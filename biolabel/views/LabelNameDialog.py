@@ -54,7 +54,7 @@ class LabelName_Dialog(QtWidgets.QDialog):
         self.gridLayout.setRowStretch(1, 1)
         self.gridLayout.setRowStretch(2, 10)
 
-        # 添加退出事件处理程序
+        # 添加取消事件
         self.buttonBox.rejected.connect(self.reject)
         # 為 "OK" 按鈕添加 "clicked" 事件
         self.buttonBox.accepted.connect(self.accept)
@@ -63,7 +63,7 @@ class LabelName_Dialog(QtWidgets.QDialog):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        Dialog.setWindowTitle(_translate("Input the Label Name", "Input the Label Name"))
         # self.LabelNameList.itemClicked.connect(self.show_message)
 
     def accept(self):

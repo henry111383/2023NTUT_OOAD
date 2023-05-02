@@ -18,7 +18,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     tempLabel = None
     UILabelList = []
     current = None
-    issueLabelCommand = pyqtSignal(str, str, str, list) # cmd, name, type, ptlist
+    issueLabelCommand = pyqtSignal(str, str, list) # cmd, type, ptlist
     issueLabelNameDialogShow = pyqtSignal() 
 
     pen_color=Qt.red    #畫筆顏色
@@ -72,8 +72,9 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                     self.points = [Point(self.x, self.y)] # done
                     point = MyPointItem(self.x, self.y)
                     self.addItem(point)
+                    self.issueLabelNameDialogShow.emit()
                     self.UILabelList.append(point)
-                    self.issueLabelCommand.emit("CreateLabel", "Test", self.shape, self.points) ###
+                    self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
                 elif self.shape == 'line':
                     self.DrawLine()
                 elif self.shape == 'linestrip':
@@ -84,8 +85,9 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 not self.isOutofScene(Point(self.x, self.y)) :
                 if (self.shape == 'linestrip' or self.shape == "poly")and self.drawing==True:
                     self.drawing = False
+                    self.issueLabelNameDialogShow.emit()
                     self.UILabelList.append(self.tempLabel) # points done
-                    self.issueLabelCommand.emit("CreateLabel", "Test", self.shape, self.points) ###
+                    self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
         # event.accept()
                     
         
@@ -139,7 +141,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.tempLabel.update()
             self.issueLabelNameDialogShow.emit()
             self.UILabelList.append(self.tempLabel)
-            self.issueLabelCommand.emit("CreateLabel", "Test", self.shape, self.points) ###
+            self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
         return
 
     def DrawLine(self):
@@ -154,8 +156,9 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.points.append(Point(self.x, self.y)) # done
             self.tempLabel.setEndPoint(self.x, self.y)
             self.tempLabel.update()
+            self.issueLabelNameDialogShow.emit()
             self.UILabelList.append(self.tempLabel)
-            self.issueLabelCommand.emit("CreateLabel", "Test", self.shape, self.points) ###
+            self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
         return
     
     def DrawLineStrip(self):

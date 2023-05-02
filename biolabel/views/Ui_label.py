@@ -7,25 +7,18 @@ from typing import List, Tuple
 
 class LabelItem():
     label = None
+    # Movement = None
 
 
 
 class MyPointItem(QGraphicsEllipseItem, LabelItem):
-    # 讓鼠標能圈選的模式
     EditMode = False
     def __init__(self, x, y, radius=5, parent=None):
         super().__init__(parent)
-        
-        # 设置点的位置和大小
         self.setPos(x, y)
         self.setRect(-radius, -radius, radius*2, radius*2)
-        
-        # 设置点的样式
         self.setBrush(QBrush(QColor(255, 0, 0)))
         self.setPen(QPen(Qt.NoPen))
-
-        
-        # 设置点的可选中和可移动属性
         self.setFlag(self.ItemIsSelectable)
         self.setFlag(self.ItemIsMovable)
     
@@ -50,6 +43,7 @@ class MyPointItem(QGraphicsEllipseItem, LabelItem):
             pos = event.scenePos()
             self.endPos = pos
             self.setPos(pos)
+            # self.Movement = self.endPos - self.startPos 
 
 
 class LinePoint(QGraphicsEllipseItem, LabelItem):
