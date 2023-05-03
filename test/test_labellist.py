@@ -44,3 +44,8 @@ class LabelListTest(unittest.TestCase):
         self.assertEqual(self.Label1, result[0])
         self.assertEqual(self.Label2, result[1])
         self.assertEqual(new_Label, result[2])
+    
+    def test_ClearAllLabel(self):
+        self.Labellist.ClearAllLabel()
+        result = self.Labellist.GetLabelList()
+        self.assertEqual(0,len(result))

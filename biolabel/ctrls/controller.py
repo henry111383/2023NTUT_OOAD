@@ -155,7 +155,17 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.EditMode   = False
         self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
         self.StatusBarText("")
+        self.resetComponent()
         self.CheckCursorStyle()
+    
+    def resetComponent(self):
+        self.LabelNameList.clear()  
+        # ViewWidgets
+        self.ui.LabelNameList.clear()
+        # ViewWidgets
+        self.ui.canvas.scene.LabelNameDialog.LabelNameList.clear()
+        self.labelList.ClearAllLabel()
+        self.ui.canvas.scene.UILabelList.clear()
 
 
     # read image to view

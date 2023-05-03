@@ -210,7 +210,7 @@ class GraphicView(QGraphicsView):
         self.setMouseTracking(True)
         self.setContextMenuPolicy(QtCore.Qt.NoContextMenu)  # 禁用右鍵選單
         try:
-            self.scene = MyScene()  # 设置管理QgraphicsItems的场景
+            self.scene = MyScene()  # 設置管理QgraphicsItems的場景
             self.setAlignment(Qt.AlignTop | Qt.AlignCenter) 
             self.setScene(self.scene) 
         except Exception as e:
