@@ -129,9 +129,9 @@ class Ui_MainWindow(object):
         self.label_LabelList.setAlignment(QtCore.Qt.AlignCenter)
         self.label_LabelList.setObjectName("label_LabelList")
         self.verticalLayout_9.addWidget(self.label_LabelList)
-        self.listView_3 = QtWidgets.QListView(self.centralwidget)
-        self.listView_3.setObjectName("listView_3")
-        self.verticalLayout_9.addWidget(self.listView_3)
+        self.LabelListWidget = QtWidgets.QListWidget(self.centralwidget)
+        self.LabelListWidget.setObjectName("LabelListWidget")
+        self.verticalLayout_9.addWidget(self.LabelListWidget)
 
         # === label: FileList ===
         self.label_FileList = QtWidgets.QLabel(self.centralwidget)

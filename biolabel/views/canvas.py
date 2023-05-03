@@ -17,7 +17,6 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     points = []
     tempLabel = None
     UILabelList = []
-    current = None
     issueLabelCommand = pyqtSignal(str, str, list) # cmd, type, ptlist
     issueLabelNameDialogShow = pyqtSignal() 
     inputLabelNameSuccess = False
@@ -40,10 +39,6 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         self.wx=0
         self.wy=0
 
-    def drawBackground(self, painter: QPainter, rect: QRectF):
-        # painter.drawRect(0,0,self.width(),self.height())
-        return
-
     def ChangeShape(self, s):
         self.shape = s
 
@@ -52,10 +47,6 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
 
     def ChangePenThickness(self, thickness):
         self.pen_width=thickness
-
-    def ChangeEraserThickness(self,EraserThickness):
-        self.Eraser_pen_width=EraserThickness
-    
     
     def mousePressEvent(self, event):
         # 滑鼠按下事件

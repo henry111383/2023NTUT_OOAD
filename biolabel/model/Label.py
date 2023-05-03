@@ -27,8 +27,8 @@ class Label():
     def GetName(self):
         return self.__LabelName
     
-    def SetName(self, Name):
-        self.__LabelName = Name
+    def SetName(self, name):
+        self.__LabelName = name
         return
         
     def GetLabelType(self):

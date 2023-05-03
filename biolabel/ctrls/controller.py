@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsPixmapItem,QDi
 from PyQt5.QtGui import QImage, QPixmap, QCursor
 
 from views.Ui_MainWindow import Ui_MainWindow
-from views.LabelNameDialog import LabelName_Dialog
 from views.canvas import *
 import numpy as np
 import cv2
@@ -37,7 +36,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.setup_control()
         self.labelService = LabelService()
         self.imageProcessService = ImageProcessService()
-        self.labelList = LabelList()
+        self.labelList = self.labelService.labelList
         self.templabelName = ""
         
 
@@ -111,7 +110,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ui.canvas.scene.EditMode   = False
             self.ui.toolButton_EditLabel.setStyleSheet("background-color: auto")
             self.StatusBarText('Mode : CreateLabel')
-            self.ChangeLabelSelectable(self.ui.canvas.scene)
+            self.ChangeLabelSelectable()
             self.CheckCursorStyle()
             self.CreateLabelmenu.exec_(QCursor.pos())
         
@@ -124,7 +123,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ui.toolButton_EditLabel.setStyleSheet\
                 ("background-color: {}".format(QColor(Qt.darkGray).name()))
             self.StatusBarText('Mode : EditLabel')
-            self.ChangeLabelSelectable(self.ui.canvas.scene)
+            self.ChangeLabelSelectable()
             self.CheckCursorStyle()
 
     # === toolBotton action : DIP ===
@@ -166,6 +165,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.LabelNameDialog.LabelNameList.clear()
         self.labelList.ClearAllLabel()
         self.ui.canvas.scene.UILabelList.clear()
+        self.ui.LabelListWidget.clear()
 
 
     # read image to view
@@ -194,7 +194,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         return
     
     # change QGraphicsItem selectable
-    def ChangeLabelSelectable(self, scene):
+    def ChangeLabelSelectable(self):
+        scene = self.ui.canvas.scene
         if scene.EditMode :
             for item in scene.UILabelList:
                 item.setFlag(QGraphicsItem.ItemIsSelectable, True)
@@ -253,7 +254,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # Call LabelService
     def issueCreateLabelCommand(self, cmd, type, ptList):
         if cmd == 'CreateLabel' and len(self.templabelName) !=0:
-            new_label = self.labelService.isCreateLabel(self.templabelName, type, ptList) # 創建一個Label
+            new_label = self.labelService.CreateLabel(self.templabelName, type, ptList) # 創建一個Label
+            self.ui.LabelListWidget.addItem(self.templabelName)
             self.ui.canvas.scene.tempLabel.label = new_label # 每個UILabel對應一個Label
             self.labelList.AddLabel(new_label) # 加入labelList
             print(f"成功！目前有這些：{[x.GetName() for x in self.labelList.GetLabelList()]}")

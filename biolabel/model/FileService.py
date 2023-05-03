@@ -6,19 +6,19 @@ from .Image import Image
 class FileService():
     def __init__(self):
         pass
-    def StoreImage(self):
+    def StoreImage(self, IF:ImageFile, fileLocation:str)-> bool:
         pass    #todo 
-    def LoadImage(self):
+    def LoadImage(self, fileLocation:str)-> bool:
         pass    #todo 
-    def StoreLabel(self):
+    def StoreLabel(self, LF:LabelFile, fileLocation:str)-> bool:
         pass    #todo 
-    def LoadLabel(self):
+    def LoadLabel(self, fileLocation:str)-> bool:
         pass    #todo 
-    def ConvertLabel2File(self, Label:LabelList )-> LabelFile: 
+    def ConvertLabel2File(self, label:LabelList )-> LabelFile: 
         pass    #todo 
-    def ConvertFile2Label(self, File :File)-> LabelList:
+    def ConvertFile2Label(self, file :File)-> LabelList:
         pass    #todo 
-    def ConvertImage2File(self, Img:Image ) -> ImageFile:
+    def ConvertImage2File(self, img:Image ) -> ImageFile:
         pass    #todo 
-    def ConvertFFile2Image(self,  File :File) -> Image:
+    def ConvertFile2Image(self,  file :File) -> Image:
         pass    #todo 
