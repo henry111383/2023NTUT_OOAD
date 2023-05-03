@@ -1,11 +1,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QRectF, Qt, QPointF , QLineF , QSize, pyqtSignal
-from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap
+from PyQt5.QtCore import QRectF, Qt, QPointF , QLineF , QSize, pyqtSignal, QEvent, QTimer
+from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap, QMouseEvent
 from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets
 import cv2
 from model.Point import Point
-# from utils.rect import getAccurateRect
+from views.LabelNameDialog import LabelName_Dialog
 from .Ui_label import *
 
 class MyScene(QGraphicsScene): # 用來放自己的圖或標註
@@ -21,6 +21,8 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     issueLabelCommand = pyqtSignal(str, str, list) # cmd, type, ptlist
     issueLabelNameDialogShow = pyqtSignal() 
     inputLabelNameSuccess = False
+    keycode = None
+
 
     pen_color=Qt.red    #畫筆顏色
     pen_width = 5       #畫筆粗細
@@ -28,7 +30,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     def __init__(self):
         super(MyScene, self).__init__(parent=None) # 初始化 QGraphicsScene
         self.setSceneRect(0,0,400,400) # 預設大小，載入檔案後會改大小
-
+        self.LabelNameDialog = LabelName_Dialog()
         self.shape= "rect" # 預設標注模式
         self.pen_color = Qt.red
         self.pen_width = 5 
@@ -58,45 +60,55 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     def mousePressEvent(self, event):
         # 滑鼠按下事件
         super(MyScene, self).mousePressEvent(event)
-        
+
         # get the cooridinate in scene
         pos = event.scenePos()
         self.x = pos.x()
         self.y = pos.y()
-        # print(self.x, self.y)
-        if self.ImgLoad and self.CreateMode :
-            if (event.button() == Qt.LeftButton) and \
-                not self.isOutofScene(Point(self.x, self.y)) :
+        if self.ImgLoad and self.CreateMode and (not self.isOutofScene(Point(self.x, self.y))) :
+            if (event.button() == Qt.LeftButton) :
                 if self.shape == 'rect':
-                    self.DrawRect(pos)
+                    self.DrawRect()
                 elif self.shape == 'point':
                     self.points = [Point(self.x, self.y)] # done
                     self.tempLabel = MyPointItem(self.x, self.y)
                     self.addItem(self.tempLabel)
                     self.issueLabelNameDialogShow.emit()
-                    print(self.inputLabelNameSuccess)
                     if self.inputLabelNameSuccess :
                         self.UILabelList.append(self.tempLabel)
                         self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
                     else:
                         self.removeItem(self.tempLabel)
                         del self.tempLabel
+
                 elif self.shape == 'line':
                     self.DrawLine()
                 elif self.shape == 'linestrip':
                     self.DrawLineStrip()
                 elif self.shape == 'poly':
                     self.DrawLineStrip()
-            elif event.button() == Qt.MiddleButton  and \
-                not self.isOutofScene(Point(self.x, self.y)) :
-                if (self.shape == 'linestrip' or self.shape == "poly")and self.drawing==True:
-                    self.drawing = False
+
+            elif (event.button() == Qt.RightButton) :
+                if (self.shape == 'linestrip' or self.shape == "poly") and self.drawing==True:
                     self.issueLabelNameDialogShow.emit()
-                    self.UILabelList.append(self.tempLabel) # points done
-                    self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
-        # event.accept()
                     
-        
+                    if self.inputLabelNameSuccess:
+                        self.UILabelList.append(self.tempLabel) # points done
+                        self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+                    else:
+                        self.removeItem(self.tempLabel)
+                        del self.tempLabel
+                    self.drawing = False
+            
+                        
+
+    def keyPressEvent(self, event):  
+        self.keycode = event.key()
+        print(self.keycode)
+        if self.keycode == 16777216: # esc
+            self.resetDrawing()
+
+
     def mouseMoveEvent(self, event):
         # 滑鼠移動事件
         super(MyScene, self).mouseMoveEvent(event)
@@ -132,7 +144,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         self.drawing = False
         return
         
-    def DrawRect(self, pos):
+    def DrawRect(self):
         if not self.drawing :
             self.drawing = True
             self.points = [Point(self.x, self.y)] # init
@@ -146,8 +158,13 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.tempLabel.setEndPoint(self.x, self.y)
             self.tempLabel.update()
             self.issueLabelNameDialogShow.emit()
-            self.UILabelList.append(self.tempLabel)
-            self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+            if self.inputLabelNameSuccess:
+                self.UILabelList.append(self.tempLabel)
+                self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+            else:
+                self.removeItem(self.tempLabel)
+                del self.tempLabel
+                self.drawing = False
         return
 
     def DrawLine(self):
@@ -163,8 +180,13 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.tempLabel.setEndPoint(self.x, self.y)
             self.tempLabel.update()
             self.issueLabelNameDialogShow.emit()
-            self.UILabelList.append(self.tempLabel)
-            self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+            if self.inputLabelNameSuccess:
+                self.UILabelList.append(self.tempLabel)
+                self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+            else:
+                self.removeItem(self.tempLabel)
+                del self.tempLabel
+                self.drawing = False
         return
     
     def DrawLineStrip(self):
@@ -183,48 +205,18 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         return
 
 class GraphicView(QGraphicsView):
-    
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMouseTracking(True)
+        self.setContextMenuPolicy(QtCore.Qt.NoContextMenu)  # 禁用右鍵選單
         try:
             self.scene = MyScene()  # 设置管理QgraphicsItems的场景
-            self.setAlignment(Qt.AlignTop | Qt.AlignCenter)
-            self.x=0
-            self.y=0
-            self.wx=0
-            self.wy=0
-            
+            self.setAlignment(Qt.AlignTop | Qt.AlignCenter) 
             self.setScene(self.scene) 
-
-            # === CreateMode下，右鍵會出現選單 ===
-            self.menu = QtWidgets.QMenu()
-            # Add menu options
-            create_polygons_option = self.menu.addAction('Create Polygons')
-            create_rect_option = self.menu.addAction('Create Rectangle')
-            create_line_option = self.menu.addAction('Create Line')
-            create_linestrip_option = self.menu.addAction('Create LineStrip')
-            create_point_option = self.menu.addAction('Create Point')
-            undo_option = self.menu.addAction('Undo')
-            # Menu option events
-            create_polygons_option.triggered.connect(lambda: self.scene.ChangeShape("poly"))
-            create_rect_option.triggered.connect(lambda: self.scene.ChangeShape("rect"))
-            create_point_option.triggered.connect(lambda: self.scene.ChangeShape("point"))
-            create_line_option.triggered.connect(lambda: self.scene.ChangeShape("line"))
-            create_linestrip_option.triggered.connect(lambda: self.scene.ChangeShape("linestrip"))
-            # =================================
-            
-            # 設置右鍵清單動作
-            self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-            self.customContextMenuRequested.connect(self.right_menu)
-
         except Exception as e:
             print(e)
 
-    def right_menu(self, pos):
-        if self.scene.CreateMode and self.scene.ImgLoad:
-            self.scene.resetDrawing()
-            # Position
-            self.menu.exec_(self.mapToGlobal(pos))
-            return
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        self.scene.setFocus()
+        return

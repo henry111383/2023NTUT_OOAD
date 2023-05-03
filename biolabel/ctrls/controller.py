@@ -32,7 +32,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         super().__init__() 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.LabelNameDialog = LabelName_Dialog()
+        
 
         self.setup_control()
         self.labelService = LabelService()
@@ -53,12 +53,30 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.actionDIP.triggered.connect(self.Click_DIP)
 
         # issueLabelCommand
-        self.ui.canvas.scene.issueLabelCommand.connect(self.issueLabelCommand)
+        self.ui.canvas.scene.issueLabelCommand.connect(self.issueCreateLabelCommand)
         # issueLabelCommand
         self.ui.canvas.scene.issueLabelNameDialogShow.connect(self.LabelNameDialogShow)
 
         #LabelNameDialogButton
-        self.LabelNameDialog.AddLabelName.connect(self.LabelNameAccept)
+        self.ui.canvas.scene.LabelNameDialog.AddLabelName.connect(self.LabelNameAccept)
+
+        # === CreateLabel選單 ===
+        self.CreateLabelmenu = QtWidgets.QMenu()
+        # Add menu options
+        create_polygons_option = self.CreateLabelmenu.addAction('Create Polygons')
+        create_rect_option = self.CreateLabelmenu.addAction('Create Rectangle')
+        create_line_option = self.CreateLabelmenu.addAction('Create Line')
+        create_linestrip_option = self.CreateLabelmenu.addAction('Create LineStrip')
+        create_point_option = self.CreateLabelmenu.addAction('Create Point')
+        undo_option = self.CreateLabelmenu.addAction('Undo')
+        # Menu option events
+        create_polygons_option.triggered.connect(lambda: self.ui.canvas.scene.ChangeShape("poly"))
+        create_rect_option.triggered.connect(lambda: self.ui.canvas.scene.ChangeShape("rect"))
+        create_point_option.triggered.connect(lambda: self.ui.canvas.scene.ChangeShape("point"))
+        create_line_option.triggered.connect(lambda: self.ui.canvas.scene.ChangeShape("line"))
+        create_linestrip_option.triggered.connect(lambda: self.ui.canvas.scene.ChangeShape("linestrip"))
+        # =================================
+
 
         # === DIP 選單 ===
         self.DIPmenu = QtWidgets.QMenu()
@@ -95,6 +113,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.StatusBarText('Mode : CreateLabel')
             self.ChangeLabelSelectable(self.ui.canvas.scene)
             self.CheckCursorStyle()
+            self.CreateLabelmenu.exec_(QCursor.pos())
         
     # === toolBotton action : Edit Label ===    
     def Click_EditLabel(self):
@@ -195,11 +214,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def SetLabelNameList(self):
         for item in self.LabelNameList:
             self.ui.LabelNameList.addItem(item)
-            self.LabelNameDialog.LabelNameList.addItem(item)
+            self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(item)
             
     def LabelNameDialogShow(self):
         self.templabelName = ""
-        self.LabelNameDialog.exec_()
+        self.ui.canvas.scene.LabelNameDialog.exec_()
+        self.ui.canvas.scene.setFocus()
+        QApplication.processEvents()
 
     def LabelNameAccept(self, str):
         if self.checkLabelNameSuccess(str):
@@ -207,7 +228,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             if self.LabelNameList.count(str) == 0:
                 self.LabelNameList.append(str)
                 self.ui.LabelNameList.addItem(str)
-                self.LabelNameDialog.LabelNameList.addItem(str)
+                self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(str)
         
 
     def checkLabelNameSuccess(self, str):
@@ -220,7 +241,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             return False
 
     # Call LabelService
-    def issueLabelCommand(self, cmd, type, ptList):
+    def issueCreateLabelCommand(self, cmd, type, ptList):
         if cmd == 'CreateLabel' and len(self.templabelName) !=0:
             new_label = self.labelService.isCreateLabel(self.templabelName, type, ptList) # 創建一個Label
             self.ui.canvas.scene.tempLabel.label = new_label # 每個UILabel對應一個Label
