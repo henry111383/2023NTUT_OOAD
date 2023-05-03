@@ -1,8 +1,13 @@
-from File import *
+from .File import *
 
 class ImageFile(File):
-    def __init__(self, image, parent=None):
-        super(ImageFile, self).__init__(parent)
+    def __init__(self, image,\
+                    fileLocation=None, \
+                    fileName=None, \
+                    fileFormat=None, \
+                    directory=None, \
+                    parent=None):
+        super(ImageFile, self).__init__(fileLocation,fileName,fileFormat,directory)
         self.__ImgInfo = image
 
     # getter

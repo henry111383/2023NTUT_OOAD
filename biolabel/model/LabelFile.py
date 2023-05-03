@@ -1,8 +1,13 @@
-from File import *
+from .File import *
 
 class LabelFile(File):
-    def __init__(self, labelList, parent=None):
-        super(LabelFile, self).__init__(parent)
+    def __init__(self, labelList,\
+                    fileLocation=None, \
+                    fileName=None, \
+                    fileFormat=None, \
+                    directory=None, \
+                    parent=None):
+        super(LabelFile, self).__init__(fileLocation, fileName, fileFormat, directory)
         self.__LabelInfo = labelList
 
     # getter
