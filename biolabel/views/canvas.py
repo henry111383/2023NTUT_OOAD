@@ -130,7 +130,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         pos = event.scenePos()
         moveX = pos.x() - self.x  
         moveY = pos.y() - self.y
-        if self.EditMode:
+        if self.ImgLoad and self.EditMode:
             item = self.itemAt(pos, QTransform())
             parent= item.parentItem()
             index = 0

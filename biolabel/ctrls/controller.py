@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 from model.LabelService import LabelService
 from model.ImageProcessService import ImageProcessService
+from model.FileService import FileService
 from model.LabelList import LabelList
 from model.Image import Image
 
@@ -36,6 +37,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.setup_control()
         self.labelService = LabelService()
         self.imageProcessService = ImageProcessService()
+        self.fileService = FileService()
         self.labelList = self.labelService.labelList
         self.templabelName = ""
         
@@ -172,13 +174,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     # read image to view
     def read_img_to_view(self, imgFile):
-        # read image
-        img = cv2.cvtColor(cv2.imread(imgFile), cv2.COLOR_BGR2RGB)
-        # create Image instance
-        self.original_img = Image(img, channel='RGB', imageName='Original')
+        self.original_img = self.fileService.LoadImage(self.current_file)
         # reset the view
         self.ui.canvas.scene.clear()
         # get size of image
+        img = self.original_img.GetImg()
         h, w, _ = img.shape
         # set QImage
         qImg = QImage(img, w, h, 3 * w, QImage.Format_RGB888)
