@@ -37,7 +37,7 @@ class FileService():
             LabelDict={'Name': Name, 'Color': Color, 'Type': Type, 'Points': Points}
 
             MyJson[index] = LabelDict
-        json_data = json.dumps(MyJson)
+        json_data = json.dumps(MyJson, indent=4)
         with open(LF.GetFileLocation(), "w") as file:
             file.write(json_data)
         return
