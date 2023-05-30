@@ -9,7 +9,7 @@ class Point(object):
         self.__X = x
         return
     
-    def SetX(self, y):
+    def SetY(self, y):
         self.__Y = y
         return
 

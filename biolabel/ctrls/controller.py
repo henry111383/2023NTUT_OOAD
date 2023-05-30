@@ -53,6 +53,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         # issueLabelCommand
         self.ui.canvas.scene.issueLabelCommand.connect(self.issueCreateLabelCommand)
+        # issueUpdateLabelCommand
+        self.ui.canvas.scene.issueUpdateLabelCommand.connect(self.issueUpdateLabelCommand)
         # issueLabelCommand
         self.ui.canvas.scene.issueLabelNameDialogShow.connect(self.LabelNameDialogShow)
 
@@ -263,6 +265,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             # LabelName為空則不創建Label
             self.ui.canvas.scene.drawing = True
 
+    # Call LabelService
+    def issueUpdateLabelCommand(self, moveX , moveY , index , Label):
+        label = self.labelService.moveLabel( moveX , moveY , index , Label) 
 
     # Call DIPService
     def issueImageProcessCommand(self, str):

@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QRectF, Qt, QPointF , QLineF , QSize, pyqtSignal, QEvent, QTimer
-from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap, QMouseEvent
+from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap, QMouseEvent,QTransform
 from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets
 import cv2
@@ -18,9 +18,11 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     tempLabel = None
     UILabelList = []
     issueLabelCommand = pyqtSignal(str, str, list) # cmd, type, ptlist
+    issueUpdateLabelCommand = pyqtSignal(float, float, int , object) # cmd, type, ptlist
     issueLabelNameDialogShow = pyqtSignal() 
     inputLabelNameSuccess = False
     keycode = None
+    PressItem = None
 
 
     pen_color=Qt.red    #畫筆顏色
@@ -85,14 +87,16 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                     
                     if self.inputLabelNameSuccess:
                         self.UILabelList.append(self.tempLabel) # points done
+                        self.points.append ( Point(self.x, self.y)) # init
                         self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
                     else:
                         self.removeItem(self.tempLabel)
                         del self.tempLabel
                     self.drawing = False
+        elif self.ImgLoad and self.EditMode and (not self.isOutofScene(Point(self.x, self.y))):
+            self.PressItem = self.itemAt(event.scenePos(), QTransform())
             
-                        
-
+            
     def keyPressEvent(self, event):  
         self.keycode = event.key()
         print(self.keycode)
@@ -120,7 +124,28 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                     self.tempLabel.setLastPoint(pos.x(),pos.y())
                     self.tempLabel.updatePath()
         return
-
+    def mouseReleaseEvent(self, event):
+        # 滑鼠移動事件
+        super(MyScene, self).mouseReleaseEvent(event)
+        pos = event.scenePos()
+        moveX = pos.x() - self.x  
+        moveY = pos.y() - self.y
+        if self.EditMode:
+            item = self.itemAt(pos, QTransform())
+            parent= item.parentItem()
+            index = 0
+            if (item is self.PressItem) & self.CheckLabelInUiLabel(item):
+                if parent == None :
+                    index = len(item.childItems())
+                    print(index)
+                    self.issueUpdateLabelCommand.emit( moveX , moveY , index , item.label) ###
+                else:
+                    index = parent.childItems().index(item)
+                    self.issueUpdateLabelCommand.emit( moveX , moveY , index , parent.label) ###
+            else : 
+                print(item)
+                print(self.PressItem)
+        return
     def isOutofScene(self, pt):
         w, h = self.width(), self.height()
         return not (0 <= pt.GetX() <= w - 1 and 0 <= pt.GetY() <= h - 1)
@@ -188,13 +213,21 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                 self.tempLabel = MyLineStrip([(self.x, self.y),(self.x, self.y)], shape="poly")
             else:
                 self.tempLabel = MyLineStrip([(self.x, self.y),(self.x, self.y)])
-            self.addItem(self.tempLabel)     
+            self.addItem(self.tempLabel)
+            
         else:
             self.points.append(Point(self.x, self.y))
             self.tempLabel.addPoint((self.x, self.y))
             self.tempLabel.updatePath()
         return
-
+    def CheckLabelInUiLabel(self,UiLabel):
+        UIlist = [ MyLineItem, MyLineStrip , MyPointItem , MyRectItem , LinePoint]
+        if isinstance(UiLabel,MyLineItem) | isinstance(UiLabel,MyLineStrip) | isinstance(UiLabel,MyPointItem) \
+            | isinstance(UiLabel,MyRectItem) | isinstance(UiLabel,LinePoint) :
+            return True
+        else:
+            return False
+    
 class GraphicView(QGraphicsView):
     def __init__(self, parent=None):
         super().__init__(parent)
