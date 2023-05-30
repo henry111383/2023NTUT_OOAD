@@ -4,6 +4,7 @@ from PyQt5.QtGui import QImage, QPixmap, QCursor
 
 from views.Ui_MainWindow import Ui_MainWindow
 from views.canvas import *
+import os
 import numpy as np
 import cv2
 from model.LabelService import LabelService
@@ -300,5 +301,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # Save My label to Json
     def saveMyLabel(self):
         current_labellist = self.labelService.labelList
-        print([x.GetName() for x in current_labellist.GetLabelList()])
-        exit()
+        # into File
+        MyLabelFile = self.fileService.ConvertLabel2File(label=current_labellist)
+        # save LabelFile
+        FileName = os.path.splitext(self.current_file)[0] + '.json'
+        MyLabelFile.SetFileLocation(FileName)
+        print(FileName)
+        self.fileService.StoreLabel(LF=MyLabelFile, format='My')
+        

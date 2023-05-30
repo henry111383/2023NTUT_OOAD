@@ -4,6 +4,7 @@ class Label():
         self.__LabelName = name
         self.__LabelType = type
         self.__ptList = ptList
+        self.__LabelColor = '#ff56ff'
 
     def GetPoint(self):
         return self.__ptList
@@ -33,3 +34,6 @@ class Label():
         
     def GetLabelType(self):
         return self.__LabelType
+    
+    def GetColor(self):
+        return self.__LabelColor
