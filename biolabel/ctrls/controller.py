@@ -38,7 +38,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.labelService = LabelService()
         self.imageProcessService = ImageProcessService()
         self.fileService = FileService()
-        self.labelList = self.labelService.labelList
         self.templabelName = ""
         
 
@@ -52,6 +51,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.actionCreateLabel.triggered.connect(self.Click_CreateLabel)
         self.ui.actionEditLabel.triggered.connect(self.Click_EditLabel)
         self.ui.actionDIP.triggered.connect(self.Click_DIP)
+        self.ui.actionSave.triggered.connect(self.saveMyLabel)
 
         # issueLabelCommand
         self.ui.canvas.scene.issueLabelCommand.connect(self.issueCreateLabelCommand)
@@ -167,7 +167,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.LabelNameList.clear()
         # ViewWidgets
         self.ui.canvas.scene.LabelNameDialog.LabelNameList.clear()
-        self.labelList.ClearAllLabel()
+        self.labelService.labelList.ClearAllLabel()
         self.ui.canvas.scene.UILabelList.clear()
         self.ui.LabelListWidget.clear()
 
@@ -189,6 +189,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.addItem(self.imgItem)
         self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
         return
+    
+    def store_current_img(self, img, name, directory, format):
+        pass  #todo
+        # imgFile = self.fileService.ConvertImage2File(self.current_img)
+        # self.fileService.StoreImage()
     
     # set text in StatusBar
     def StatusBarText(self, str):
@@ -259,8 +264,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             new_label = self.labelService.CreateLabel(self.templabelName, type, ptList) # 創建一個Label
             self.ui.LabelListWidget.addItem(self.templabelName)
             self.ui.canvas.scene.tempLabel.label = new_label # 每個UILabel對應一個Label
-            self.labelList.AddLabel(new_label) # 加入labelList
-            print(f"成功！目前有這些：{[x.GetName() for x in self.labelList.GetLabelList()]}")
+            self.labelService.labelList.AddLabel(new_label) # 加入labelList
+            print(f"成功！目前有這些：{[x.GetName() for x in self.labelService.labelList.GetLabelList()]}")
         else:
             # LabelName為空則不創建Label
             self.ui.canvas.scene.drawing = True
@@ -290,3 +295,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             # set QPixmanp
             pix = QPixmap.fromImage(qImg)
             self.imgItem.setPixmap(pix)
+
+
+    # Save My label to Json
+    def saveMyLabel(self):
+        current_labellist = self.labelService.labelList
+        print([x.GetName() for x in current_labellist.GetLabelList()])
+        exit()
