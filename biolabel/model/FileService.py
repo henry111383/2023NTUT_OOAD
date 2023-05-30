@@ -13,9 +13,14 @@ class FileService():
 
     def LoadImage(self, fileLocation:str)-> bool:
         # read image
-        img = cv2.cvtColor(cv2.imread(fileLocation), cv2.COLOR_BGR2RGB)
-        # create Image instance
-        return Image(img, channel='RGB', imageName='Original')
+        try:
+            img = cv2.cvtColor(cv2.imread(fileLocation), cv2.COLOR_BGR2RGB)
+            # create Image instance
+            return Image(img, channel='RGB', imageName='Original')
+        except:
+            print('Error! Wrong format!')
+            return
+        
 
     def StoreLabel(self, LF:LabelFile, fileLocation:str)-> bool:
         pass    #todo 
