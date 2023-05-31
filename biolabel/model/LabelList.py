@@ -19,3 +19,6 @@ class LabelList():
     def ClearAllLabel(self):
         self.__labels.clear()
         return
+
+    def RemoveLabel(self,label):
+        self.__labels.remove(label)

@@ -20,6 +20,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     issueLabelCommand = pyqtSignal(str, str ,str, list) # cmd, type, ptlist
     issueUpdateLabelCommand = pyqtSignal(float, float, int , object) # cmd, type, ptlist
     issueLabelNameDialogShow = pyqtSignal(str) 
+    issueDeleteLabelCommand = pyqtSignal(object) 
     inputLabelNameSuccess = False
     keycode = None
     PressItem = None
@@ -101,13 +102,14 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             elif (event.button() == Qt.RightButton) :
                 item = self.itemAt(event.scenePos(), QTransform())
                 if self.CheckLabelInUiLabel(item) :
-                    self.msg_box.setText(f"是否要刪除此Label : {item.label.GetName()}", )
+                    self.msg_box.setText(f"是否要刪除此Label : {item.label.GetName()}" )
                     result = self.msg_box.exec_()
-                    
                     if result == QMessageBox.Yes:
-                        print("执行删除操作")
+                        self.issueDeleteLabelCommand.emit(item.label) ###
+                        self.removeItem(item)
+                        del item
                     else:
-                        print("取消删除操作")
+                        print("取消刪除")
             
     def keyPressEvent(self, event):  
         self.keycode = event.key()
