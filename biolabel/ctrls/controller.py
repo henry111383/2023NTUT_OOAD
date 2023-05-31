@@ -248,9 +248,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.setFocus()
         QApplication.processEvents()
 
-    def LabelNameDialogShowForEdit(self,label,UIlabel): # for Edit
+    def LabelNameDialogShowForEdit(self,label,UIlabel,item): # for Edit
         self.EditLabel=label
         self.UIlabel=UIlabel
+        self.EditItem = item
         self.ui.canvas.scene.LabelNameDialog.textEdit.setText(label.GetName())
         color = QColor(label.GetLabelColor())
         self.ui.canvas.scene.LabelNameDialog.toolButton.setDisabled(False)
@@ -273,6 +274,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 print(label.GetLabelColor())
                 if label.GetName() != str:
                     self.issueEditLabelNameCommand(str ,label)
+                    self.EditItem.setText(str)
                 if label.GetLabelColor() != color:
                     self.issueEditLabelColorCommand(color ,label)
                     print("qweqwe")
@@ -307,7 +309,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def handle_item_click(self,item):
         if(self.ui.canvas.scene.EditMode):
-            self.LabelNameDialogShowForEdit(item.data(4),item.data(5))
+            self.LabelNameDialogShowForEdit(item.data(4),item.data(5),item)
 
     # Call LabelService
     def issueMoveLabelCommand(self, moveX , moveY , index , Label):

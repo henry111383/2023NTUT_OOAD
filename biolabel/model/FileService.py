@@ -28,7 +28,7 @@ class FileService():
         labellist = LF.GetLabelInfo().GetLabelList()
         for index, label in enumerate(labellist):
             Name = label.GetName()
-            Color = label.GetColor()
+            Color = label.GetLabelColor()
             Type = label.GetLabelType()
             PointList =  label.GetPoint()
             Points = []
