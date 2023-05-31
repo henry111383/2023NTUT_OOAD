@@ -9,6 +9,8 @@ class ImageFile(File):
                     parent=None):
         super(ImageFile, self).__init__(fileLocation,fileName,fileFormat,directory)
         self.__ImgInfo = image
+        if directory and fileName:
+            self.__FileLocation = directory + '/' + fileName + '.' + fileFormat
 
     # getter
     def GetImgInfo(self):
