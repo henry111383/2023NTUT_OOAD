@@ -58,11 +58,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.actionSave.triggered.connect(self.saveMyLabel)
         # self.ui.actionSave_as.triggered.connect(self.)
 
-        # issueLabelCommand
+        # issueCreateLabelCommand
         self.ui.canvas.scene.issueLabelCommand.connect(self.issueCreateLabelCommand)
         # issueUpdateLabelCommand
         self.ui.canvas.scene.issueUpdateLabelCommand.connect(self.issueMoveLabelCommand)
-        # issueLabelCommand
+        # issueShowDialogLabelCommand
         self.ui.canvas.scene.issueLabelNameDialogShow.connect(self.LabelNameDialogShow)
 
         #LabelNameDialogButton
