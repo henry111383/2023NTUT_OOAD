@@ -20,7 +20,7 @@ class FileService():
             return Image(img, channel='RGB', imageName='Original')
         except:
             print('Error! Wrong format!')
-            return
+            return None
         
 
     def StoreLabel(self, LF:LabelFile, format:str)-> bool:

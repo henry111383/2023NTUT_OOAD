@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsPixmapItem,QDialog,QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsPixmapItem,QDialog,QMessageBox,QWidget
 from PyQt5.QtGui import QImage, QPixmap, QCursor
 
 from views.Ui_MainWindow import Ui_MainWindow
@@ -56,6 +56,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.actionEditLabel.triggered.connect(self.Click_EditLabel)
         self.ui.actionDIP.triggered.connect(self.Click_DIP)
         self.ui.actionSave.triggered.connect(self.saveMyLabel)
+        # self.ui.actionSave_as.triggered.connect(self.)
 
         # issueLabelCommand
         self.ui.canvas.scene.issueLabelCommand.connect(self.issueCreateLabelCommand)
@@ -147,9 +148,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.current_file, filetype = QFileDialog.getOpenFileName(self, "Open file", "./")
         print(self.current_file, filetype)
         if self.current_file :
-            self.resetMode()
             self.read_img_to_view(self.current_file)
-            self.ui.canvas.scene.ImgLoad = True
+            if self.original_img :
+                self.resetMode()
+                self.ui.canvas.scene.ImgLoad = True
+            else:
+                self.wrongFormatDialog('Not Supported Format')
 
     # === MenuBar action :OpenDir ===
     def open_folder(self):
@@ -181,19 +185,20 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # read image to view
     def read_img_to_view(self, imgFile):
         self.original_img = self.fileService.LoadImage(self.current_file)
-        # reset the view
-        self.ui.canvas.scene.clear()
-        # get size of image
-        img = self.original_img.GetImg()
-        h, w, _ = img.shape
-        # set QImage
-        qImg = QImage(img, w, h, 3 * w, QImage.Format_RGB888)
-        # set QPixmanp
-        pix = QPixmap.fromImage(qImg)
-        self.imgItem = QGraphicsPixmapItem(pix)
-        self.ui.canvas.scene.setSceneRect(QRectF(0, 0, w, h))
-        self.ui.canvas.scene.addItem(self.imgItem)
-        self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
+        if self.original_img :
+            # reset the view
+            self.ui.canvas.scene.clear()
+            # get size of image
+            img = self.original_img.GetImg()
+            h, w, _ = img.shape
+            # set QImage
+            qImg = QImage(img, w, h, 3 * w, QImage.Format_RGB888)
+            # set QPixmanp
+            pix = QPixmap.fromImage(qImg)
+            self.imgItem = QGraphicsPixmapItem(pix)
+            self.ui.canvas.scene.setSceneRect(QRectF(0, 0, w, h))
+            self.ui.canvas.scene.addItem(self.imgItem)
+            self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
         return
     
     def store_current_img(self, img, name, directory, format):
@@ -355,3 +360,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         print(FileName)
         self.fileService.StoreLabel(LF=MyLabelFile, format='My')
         
+    # Save DIP image 
+    def exportImage(self):
+        pass
+
+
+
+
+    # ======== message ========
+    def wrongFormatDialog(self, msg):
+        dlg = QMessageBox()
+        # dlg.setWindowTitle('D')
+        dlg.setText(msg)
+        button = dlg.exec()
+        # button = QPushButton("Press me for a dialog!")
+
