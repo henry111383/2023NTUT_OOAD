@@ -45,7 +45,12 @@ class MyPointItem(QGraphicsEllipseItem, LabelItem):
             self.setPos(pos)
             # self.Movement = self.endPos - self.startPos 
 
-
+    def setLineColor(self, color):
+        brush = self.brush()
+        brush.setColor(QColor(color))
+        self.setBrush(brush)
+        self.update()
+    
 class LinePoint(QGraphicsEllipseItem, LabelItem):
     EditMode = False
     def __init__(self, x, y, radius=5, parent=None):
@@ -121,7 +126,11 @@ class MyRectItem(QGraphicsPathItem, LabelItem):
             self.endPos = pos
             for i, point_item in enumerate(self.childItems()) :
                 point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
-                
+
+    def setLineColor(self, color):
+        self.pen.setColor(QColor(color))
+        self.updatePath()     
+               
 class MyLineItem(QGraphicsLineItem, LabelItem):
     EditMode = False
     def __init__(self, x1, y1, x2, y2,parent=None):
@@ -163,6 +172,12 @@ class MyLineItem(QGraphicsLineItem, LabelItem):
             self.endPos = pos
             for i, point_item in enumerate(self.childItems()) :
                 point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
+
+    def setLineColor(self, color):
+        pen = self.pen()
+        pen.setColor(QColor(color))
+        self.setPen(pen)
+        self.update()
 
 class MyLineStrip(QGraphicsPathItem, LabelItem):
     EditMode = False
@@ -238,4 +253,10 @@ class MyLineStrip(QGraphicsPathItem, LabelItem):
         self.setPath(self.path)
         self.setPen(self.pen)
         self.setBrush(self.brush)
+
+    def setLineColor(self, color):
+        pen = self.pen
+        pen.setColor(QColor(color))
+        self.setPen(pen)
+        self.update()
             

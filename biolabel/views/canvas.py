@@ -221,7 +221,6 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.tempLabel.updatePath()
         return
     def CheckLabelInUiLabel(self,UiLabel):
-        UIlist = [ MyLineItem, MyLineStrip , MyPointItem , MyRectItem , LinePoint]
         if isinstance(UiLabel,MyLineItem) | isinstance(UiLabel,MyLineStrip) | isinstance(UiLabel,MyPointItem) \
             | isinstance(UiLabel,MyRectItem) | isinstance(UiLabel,LinePoint) :
             return True

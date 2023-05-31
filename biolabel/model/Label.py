@@ -1,9 +1,10 @@
 
 class Label():
-    def __init__(self, name=None, type=None, ptList=[]):
+    def __init__(self, name=None, type=None, color="#ff0000", ptList=[]):
         self.__LabelName = name
         self.__LabelType = type
         self.__ptList = ptList
+        self.__LabelColor = color
 
     def GetPoint(self):
         return self.__ptList
@@ -33,3 +34,10 @@ class Label():
         
     def GetLabelType(self):
         return self.__LabelType
+    
+    def GetLabelColor(self):
+        return self.__LabelColor
+    
+    def SetLabelColor(self, color):
+        self.__LabelColor = color
+        return

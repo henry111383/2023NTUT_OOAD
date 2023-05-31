@@ -12,8 +12,8 @@ class Label_RectLabelShouldBeCorrect(unittest.TestCase):
         self.C = Point(20,30)
         self.D = Point(40,50)
         self.E = Point(100,100)
-        self.RectLabel1 = Label('RectLabel1', 'rect' ,[self.A, self.B])
-        self.RectLabel2 = Label('RectLabel2', 'rect',[self.C, self.D])
+        self.RectLabel1 = Label('RectLabel1', 'rect' , "#ffffff" ,[self.A, self.B])
+        self.RectLabel2 = Label('RectLabel2', 'rect', "#ffffff" ,[self.C, self.D])
         # self.RectLabel3 = Label('RectLabel2', 'point',[self.C])
         # self.RectLabel4 = Label('RectLabel2', 'point',[self.C])
         

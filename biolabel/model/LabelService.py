@@ -5,9 +5,9 @@ class LabelService():
     def __init__(self):
         self.NameList = set()
         self.labelList = LabelList([])
-    def CreateLabel(self, name, type, ptList)->Label:
+    def CreateLabel(self, name, type, Color, ptList)->Label:
         self.NameList.add(name)
-        return Label(name, type, ptList)
+        return Label(name, type, Color , ptList)
     def moveLabel(self, moveX, moveY , index , Label)->Label:
         ptList = Label.GetPoint()
         ptNumber = len(ptList)
@@ -27,9 +27,14 @@ class LabelService():
             NewPoint.SetY(pointY)
             Label.UpdatePoint(index,NewPoint)
         return Label
-    def UpdateLabelName(self, Name, Label)->Label:
+    def EditLabelName(self, Name, Label)->Label:
         Label.SetName(Name)
         return Label
+    
+    def EditLabelColor(self, color, Label)->Label:
+        Label.SetLabelColor(color)
+        return Label
+    
     def DeleteLabel(self , index ) :
         if index :
             if len(self.labelList) > index:

@@ -13,8 +13,8 @@ class LabelService_LabelServiceShouldBeCorrect(unittest.TestCase):
         self.C = Point(20,30)
         self.D = Point(40,50)
         self.E = Point(100,100)
-        self.PolyLabel1 = Label('poly1', 'poly' ,[self.A, self.B, self.E])
-        self.RectLabel2 = Label('RectLabel2', 'rect',[self.C, self.D])
+        self.PolyLabel1 = Label('poly1', 'poly', '#ffffff' ,[self.A, self.B, self.E])
+        self.RectLabel2 = Label('RectLabel2', 'rect' , '#ffffff' ,[self.C, self.D])
 
     def tearDown(self):
         del self.A
@@ -28,10 +28,12 @@ class LabelService_LabelServiceShouldBeCorrect(unittest.TestCase):
     def test_LabelService_CreateLabel(self):
         ExpectName = 'poly1'
         ExpectType = 'poly'
+        ExpectColor = '#ffffff'
         ExpectptList = [self.A, self.B, self.E]
-        NewLabel = self.LabelService.CreateLabel(ExpectName, ExpectType, ExpectptList)
+        NewLabel = self.LabelService.CreateLabel(ExpectName, ExpectType,ExpectColor, ExpectptList)
         self.assertEqual(ExpectName ,NewLabel.GetName())
         self.assertEqual(ExpectType ,NewLabel.GetLabelType())
+        self.assertEqual(ExpectColor ,NewLabel.GetLabelColor())
         self.assertEqual(ExpectptList ,NewLabel.GetPoint())
     def test_LabelService_MoveLabelOnePoint(self):
         MoveX = 40
@@ -57,9 +59,9 @@ class LabelService_LabelServiceShouldBeCorrect(unittest.TestCase):
         self.assertEqual(ExceptPoint1.GetY() , ptList[1].GetY())
         self.assertEqual(ExceptPoint2.GetX() , ptList[2].GetX())
         self.assertEqual(ExceptPoint2.GetY() , ptList[2].GetY())
-    def test_LabelService_UpdateLabelName(self):
+    def test_LabelService_EditLabelName(self):
         Name = "RectLabel1"
-        UpdatedLabel = self.LabelService.UpdateLabelName(Name,self.RectLabel2)
-        self.assertEqual(Name , UpdatedLabel.GetName())
+        EditLabel = self.LabelService.EditLabelName(Name,self.RectLabel2)
+        self.assertEqual(Name , EditLabel.GetName())
 
    

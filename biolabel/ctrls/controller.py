@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsPixmapItem,QDialog
+from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QGraphicsPixmapItem,QDialog,QMessageBox
 from PyQt5.QtGui import QImage, QPixmap, QCursor
 
 from views.Ui_MainWindow import Ui_MainWindow
@@ -40,6 +40,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.fileService = FileService()
         self.labelList = self.labelService.labelList
         self.templabelName = ""
+        self.Color = "#ffffff"
+        self.EditLabel = None
+        self.EditUIlabel = None
         
 
     def setup_control(self):
@@ -56,7 +59,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # issueLabelCommand
         self.ui.canvas.scene.issueLabelCommand.connect(self.issueCreateLabelCommand)
         # issueUpdateLabelCommand
-        self.ui.canvas.scene.issueUpdateLabelCommand.connect(self.issueUpdateLabelCommand)
+        self.ui.canvas.scene.issueUpdateLabelCommand.connect(self.issueMoveLabelCommand)
         # issueLabelCommand
         self.ui.canvas.scene.issueLabelNameDialogShow.connect(self.LabelNameDialogShow)
 
@@ -101,6 +104,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         DIP_Back2Original.triggered.connect(lambda: self.issueImageProcessCommand('Back2Original'))
         # =================================
         
+        # self.ui.LabelListWidget.itemClicked.connect(self.item_clicked)
+        self.ui.LabelListWidget.itemClicked.connect(self.handle_item_click)
 
     def changeshape(self,shape):
         self.ui.canvas.shape=shape
@@ -229,21 +234,46 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ui.LabelNameList.addItem(item)
             self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(item)
             
-    def LabelNameDialogShow(self):
+    def LabelNameDialogShow(self): # for Create
         self.templabelName = ""
+        self.ui.canvas.scene.LabelNameDialog.toolButton.setStyleSheet("")
+        self.ui.canvas.scene.LabelNameDialog.toolButton.setDisabled(True)
         self.ui.canvas.scene.LabelNameDialog.exec_()
         self.ui.canvas.scene.setFocus()
         QApplication.processEvents()
 
-    def LabelNameAccept(self, str):
-        if self.checkLabelNameSuccess(str):
-            self.templabelName = str    
-            if self.LabelNameList.count(str) == 0:
-                self.LabelNameList.append(str)
-                self.ui.LabelNameList.addItem(str)
-                self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(str)
+    def LabelNameDialogShowForEdit(self,label,UIlabel): # for Edit
+        self.EditLabel=label
+        self.UIlabel=UIlabel
+        self.ui.canvas.scene.LabelNameDialog.textEdit.setText(label.GetName())
+        color = QColor(label.GetLabelColor())
+        self.ui.canvas.scene.LabelNameDialog.toolButton.setDisabled(False)
+        self.ui.canvas.scene.LabelNameDialog.toolButton.setStyleSheet(f"background-color: {color.name()}")
+        self.ui.canvas.scene.LabelNameDialog.exec_()
+        self.ui.canvas.scene.LabelNameDialog.color = label.GetLabelColor()
         
+    def LabelNameAccept(self, str, color):
+        if self.checkLabelNameSuccess(str):
+            if self.ui.canvas.scene.CreateMode == True:
+                self.templabelName = str    
+                if self.LabelNameList.count(str) == 0:
+                    self.LabelNameList.append(str)
+                    self.ui.LabelNameList.addItem(str)
+                    self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(str)
+            elif self.ui.canvas.scene.EditMode == True:
+                print("qweqweqweqwe")
+                label = self.EditLabel
+                print (color)
+                print(label.GetLabelColor())
+                if label.GetName() != str:
+                    self.issueEditLabelNameCommand(str ,label)
+                if label.GetLabelColor() != color:
+                    self.issueEditLabelColorCommand(color ,label)
+                    print("qweqwe")
+                    self.UIlabel.setLineColor(color)
 
+        self.Color = color   #不管LabelName是否合法都可以改顏色
+        
     def checkLabelNameSuccess(self, str):
         print(str)
         if len(str) != 0: # sucess 
@@ -256,8 +286,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # Call LabelService
     def issueCreateLabelCommand(self, cmd, type, ptList):
         if cmd == 'CreateLabel' and len(self.templabelName) !=0:
-            new_label = self.labelService.CreateLabel(self.templabelName, type, ptList) # 創建一個Label
-            self.ui.LabelListWidget.addItem(self.templabelName)
+            new_label = self.labelService.CreateLabel(self.templabelName, type, self.Color, ptList) # 創建一個Label
+            item = QtWidgets.QListWidgetItem()
+            item.setText(self.templabelName)
+            item.setData(4, new_label)  
+            item.setData(5, self.ui.canvas.scene.tempLabel)  
+            self.ui.LabelListWidget.addItem(item)
             self.ui.canvas.scene.tempLabel.label = new_label # 每個UILabel對應一個Label
             self.labelList.AddLabel(new_label) # 加入labelList
             print(f"成功！目前有這些：{[x.GetName() for x in self.labelList.GetLabelList()]}")
@@ -265,9 +299,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             # LabelName為空則不創建Label
             self.ui.canvas.scene.drawing = True
 
+    def handle_item_click(self,item):
+        if(self.ui.canvas.scene.EditMode):
+            self.LabelNameDialogShowForEdit(item.data(4),item.data(5))
+
     # Call LabelService
-    def issueUpdateLabelCommand(self, moveX , moveY , index , Label):
-        label = self.labelService.moveLabel( moveX , moveY , index , Label) 
+    def issueMoveLabelCommand(self, moveX , moveY , index , Label):
+        self.labelService.moveLabel( moveX , moveY , index , Label) 
+
+    def issueEditLabelNameCommand(self, labelname, Label):
+        self.labelService.EditLabelName( labelname, Label) 
+
+    def issueEditLabelColorCommand(self, color , Label):
+        self.labelService.EditLabelColor(color , Label) 
 
     # Call DIPService
     def issueImageProcessCommand(self, str):
