@@ -362,7 +362,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     # Save My label to Json
     def saveMyLabel(self):
-        if self.labelService.labelList.GetLabelList() :
+        if self.original_img :
+            # if self.labelService.labelList.GetLabelList() :
             current_labellist = self.labelService.labelList
             # into File
             MyLabelFile = self.fileService.ConvertLabel2File(label=current_labellist)
@@ -371,7 +372,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             MyLabelFile.SetFileLocation(FileName)
             self.fileService.StoreLabel(LF=MyLabelFile, format='My')
         else :
-            self.errorDialog('No any existing label!')
+            self.errorDialog('No any existing image!')
         
     # export DIP image 
     def exportImage(self):
