@@ -146,19 +146,20 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         moveY = pos.y() - self.y
         if self.ImgLoad and self.EditMode:
             item = self.itemAt(pos, QTransform())
-            parent= item.parentItem()
-            index = 0
-            if (item is self.PressItem) & self.CheckLabelInUiLabel(item):
-                if parent == None :
-                    index = len(item.childItems())
-                    print(index)
-                    self.issueUpdateLabelCommand.emit( moveX , moveY , index , item.label) ###
-                else:
-                    index = parent.childItems().index(item)
-                    self.issueUpdateLabelCommand.emit( moveX , moveY , index , parent.label) ###
-            else : 
-                print(item)
-                print(self.PressItem)
+            if self.CheckLabelInUiLabel(item):
+                parent= item.parentItem()
+                index = 0
+                if (item is self.PressItem) :
+                    if parent == None :
+                        index = len(item.childItems())
+                        print(index)
+                        self.issueUpdateLabelCommand.emit( moveX , moveY , index , item.label) ###
+                    else:
+                        index = parent.childItems().index(item)
+                        self.issueUpdateLabelCommand.emit( moveX , moveY , index , parent.label) ###
+                else : 
+                    print(item)
+                    print(self.PressItem)
         return
     def isOutofScene(self, pt):
         w, h = self.width(), self.height()

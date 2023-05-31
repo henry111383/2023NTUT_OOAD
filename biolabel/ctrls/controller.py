@@ -255,7 +255,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def LabelNameDialogShow(self,color): # for Create
         self.templabelName = ""
         self.ui.canvas.scene.LabelNameDialog.toolButton.setStyleSheet(f"background-color: {color}")
-        self.ui.canvas.scene.LabelNameDialog.toolButton.setDisabled(True)
+        self.ui.canvas.scene.LabelNameDialog.color = color
         self.ui.canvas.scene.LabelNameDialog.exec_()
         self.ui.canvas.scene.setFocus()
         QApplication.processEvents()
@@ -266,7 +266,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.EditItem = item
         self.ui.canvas.scene.LabelNameDialog.textEdit.setText(label.GetName())
         color = QColor(label.GetLabelColor())
-        self.ui.canvas.scene.LabelNameDialog.toolButton.setDisabled(False)
         self.ui.canvas.scene.LabelNameDialog.toolButton.setStyleSheet(f"background-color: {color.name()}")
         self.ui.canvas.scene.LabelNameDialog.exec_()
         self.ui.canvas.scene.LabelNameDialog.color = label.GetLabelColor()
@@ -311,6 +310,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             item.setData(5, self.ui.canvas.scene.tempLabel)  
             self.ui.LabelListWidget.addItem(item)
             self.ui.canvas.scene.tempLabel.label = new_label # 每個UILabel對應一個Label
+            self.ui.canvas.scene.tempLabel.setLineColor(self.ui.canvas.scene.LabelNameDialog.color)
+            self.issueEditLabelColorCommand(self.ui.canvas.scene.LabelNameDialog.color ,new_label)
             self.labelService.labelList.AddLabel(new_label) # 加入labelList
             print(f"成功！目前有這些：{[x.GetName() for x in self.labelService.labelList.GetLabelList()]}")
         else:
