@@ -8,8 +8,15 @@ import json
 class FileService():
     def __init__(self):
         pass
+
     def StoreImage(self, IF:ImageFile, fileLocation:str)-> bool:
-        pass    #todo 
+        img = IF.GetImgInfo().GetImg()
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        try:
+            cv2.imwrite(fileLocation, img)
+            return True
+        except:
+            return False
 
 
     def LoadImage(self, fileLocation:str)-> Image:
@@ -44,20 +51,17 @@ class FileService():
         
 
     
-    def LoadLabel(self, fileLocation:str)-> bool:
+    def LoadLabel(self, fileLocation:str)-> LabelList:
         pass    #todo 
 
     def ConvertLabel2File(self, label:LabelList )-> LabelFile: 
-        labellist = label
-        labelfile = LabelFile(labelList=label)
-        return labelfile
+        return LabelFile(labelList=label)
         
     def ConvertFile2Label(self, file :File)-> LabelList:
         pass    #todo 
 
     def ConvertImage2File(self, img:Image) -> ImageFile:
-        # ImageFile(image=img)
-        pass    #todo 
+        return ImageFile(image=img)
 
     def ConvertFile2Image(self,  file :File) -> Image:
         pass    #todo 
