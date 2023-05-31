@@ -245,9 +245,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ui.LabelNameList.addItem(item)
             self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(item)
             
-    def LabelNameDialogShow(self): # for Create
+    def LabelNameDialogShow(self,color): # for Create
         self.templabelName = ""
-        self.ui.canvas.scene.LabelNameDialog.toolButton.setStyleSheet("")
+        self.ui.canvas.scene.LabelNameDialog.toolButton.setStyleSheet(f"background-color: {color}")
         self.ui.canvas.scene.LabelNameDialog.toolButton.setDisabled(True)
         self.ui.canvas.scene.LabelNameDialog.exec_()
         self.ui.canvas.scene.setFocus()
@@ -273,7 +273,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     self.ui.LabelNameList.addItem(str)
                     self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(str)
             elif self.ui.canvas.scene.EditMode == True:
-                print("qweqweqweqwe")
                 label = self.EditLabel
                 print (color)
                 print(label.GetLabelColor())
@@ -282,7 +281,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     self.EditItem.setText(str)
                 if label.GetLabelColor() != color:
                     self.issueEditLabelColorCommand(color ,label)
-                    print("qweqwe")
                     self.UIlabel.setLineColor(color)
 
         self.Color = color   #不管LabelName是否合法都可以改顏色
@@ -297,9 +295,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             return False
 
     # Call LabelService
-    def issueCreateLabelCommand(self, cmd, type, ptList):
+    def issueCreateLabelCommand(self, cmd, color ,type, ptList):
         if cmd == 'CreateLabel' and len(self.templabelName) !=0:
-            new_label = self.labelService.CreateLabel(self.templabelName, type, self.Color, ptList) # 創建一個Label
+            new_label = self.labelService.CreateLabel(self.templabelName, type, color, ptList) # 創建一個Label
             item = QtWidgets.QListWidgetItem()
             item.setText(self.templabelName)
             item.setData(4, new_label)  

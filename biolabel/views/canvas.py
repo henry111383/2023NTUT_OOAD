@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QRectF, Qt, QPointF , QLineF , QSize, pyqtSignal, QEvent, QTimer
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap, QMouseEvent,QTransform
-from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QMessageBox,QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets
 import cv2
 from model.Point import Point
@@ -17,9 +17,9 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     points = []
     tempLabel = None
     UILabelList = []
-    issueLabelCommand = pyqtSignal(str, str, list) # cmd, type, ptlist
+    issueLabelCommand = pyqtSignal(str, str ,str, list) # cmd, type, ptlist
     issueUpdateLabelCommand = pyqtSignal(float, float, int , object) # cmd, type, ptlist
-    issueLabelNameDialogShow = pyqtSignal() 
+    issueLabelNameDialogShow = pyqtSignal(str) 
     inputLabelNameSuccess = False
     keycode = None
     PressItem = None
@@ -32,6 +32,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         super(MyScene, self).__init__(parent=None) # 初始化 QGraphicsScene
         self.setSceneRect(0,0,400,400) # 預設大小，載入檔案後會改大小
         self.LabelNameDialog = LabelName_Dialog()
+        self.msg_box = QMessageBox()
         self.shape= "rect" # 預設標注模式
         self.pen_color = Qt.red
         self.pen_width = 5 
@@ -40,6 +41,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         self.y=0
         self.wx=0
         self.wy=0
+        self.SetMsgBox()
 
     def ChangeShape(self, s):
         self.shape = s
@@ -66,10 +68,10 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                     self.points = [Point(self.x, self.y)] # done
                     self.tempLabel = MyPointItem(self.x, self.y)
                     self.addItem(self.tempLabel)
-                    self.issueLabelNameDialogShow.emit()
+                    self.issueLabelNameDialogShow.emit(self.tempLabel.brush().color().name())
                     if self.inputLabelNameSuccess :
                         self.UILabelList.append(self.tempLabel)
-                        self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+                        self.issueLabelCommand.emit("CreateLabel",self.tempLabel.brush().color().name(), self.shape, self.points) ###
                     else:
                         self.removeItem(self.tempLabel)
                         del self.tempLabel
@@ -83,19 +85,29 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
 
             elif (event.button() == Qt.RightButton) :
                 if (self.shape == 'linestrip' or self.shape == "poly") and self.drawing==True:
-                    self.issueLabelNameDialogShow.emit()
+                    self.issueLabelNameDialogShow.emit(self.tempLabel.pen.color().name())
                     
                     if self.inputLabelNameSuccess:
                         self.UILabelList.append(self.tempLabel) # points done
                         self.points.append ( Point(self.x, self.y)) # init
-                        self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+                        self.issueLabelCommand.emit("CreateLabel", self.tempLabel.pen.color().name() ,self.shape, self.points) ###
                     else:
                         self.removeItem(self.tempLabel)
                         del self.tempLabel
                     self.drawing = False
         elif self.ImgLoad and self.EditMode and (not self.isOutofScene(Point(self.x, self.y))):
-            self.PressItem = self.itemAt(event.scenePos(), QTransform())
-            
+            if (event.button() == Qt.LeftButton) :
+                self.PressItem = self.itemAt(event.scenePos(), QTransform())
+            elif (event.button() == Qt.RightButton) :
+                item = self.itemAt(event.scenePos(), QTransform())
+                if self.CheckLabelInUiLabel(item) :
+                    self.msg_box.setText(f"是否要刪除此Label : {item.label.GetName()}", )
+                    result = self.msg_box.exec_()
+                    
+                    if result == QMessageBox.Yes:
+                        print("执行删除操作")
+                    else:
+                        print("取消删除操作")
             
     def keyPressEvent(self, event):  
         self.keycode = event.key()
@@ -173,10 +185,10 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.points.append(Point(self.x, self.y)) # done
             self.tempLabel.setEndPoint(self.x, self.y)
             self.tempLabel.update()
-            self.issueLabelNameDialogShow.emit()
+            self.issueLabelNameDialogShow.emit(self.tempLabel.pen.color().name())
             if self.inputLabelNameSuccess:
                 self.UILabelList.append(self.tempLabel)
-                self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+                self.issueLabelCommand.emit("CreateLabel", self.tempLabel.pen.color().name(),self.shape, self.points) ###
             else:
                 self.removeItem(self.tempLabel)
                 del self.tempLabel
@@ -195,10 +207,10 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.points.append(Point(self.x, self.y)) # done
             self.tempLabel.setEndPoint(self.x, self.y)
             self.tempLabel.update()
-            self.issueLabelNameDialogShow.emit()
+            self.issueLabelNameDialogShow.emit(self.tempLabel.pen.color().name())
             if self.inputLabelNameSuccess:
                 self.UILabelList.append(self.tempLabel)
-                self.issueLabelCommand.emit("CreateLabel", self.shape, self.points) ###
+                self.issueLabelCommand.emit("CreateLabel",self.tempLabel.pen.color().name(), self.shape, self.points) ###
             else:
                 self.removeItem(self.tempLabel)
                 del self.tempLabel
@@ -227,6 +239,13 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         else:
             return False
     
+    def SetMsgBox(self):
+        self.msg_box.setIcon(QMessageBox.Question)
+
+        self.msg_box.setWindowTitle("確認刪除")
+        self.msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        self.msg_box.setDefaultButton(QMessageBox.No)
+
 class GraphicView(QGraphicsView):
     def __init__(self, parent=None):
         super().__init__(parent)

@@ -18,7 +18,8 @@ class MyPointItem(QGraphicsEllipseItem, LabelItem):
         self.setPos(x, y)
         self.setRect(-radius, -radius, radius*2, radius*2)
         self.setBrush(QBrush(QColor(255, 0, 0)))
-        self.setPen(QPen(Qt.NoPen))
+        self.pen = QPen(Qt.NoPen)
+        self.setPen(self.pen)
         self.setFlag(self.ItemIsSelectable)
         self.setFlag(self.ItemIsMovable)
     
@@ -49,6 +50,7 @@ class MyPointItem(QGraphicsEllipseItem, LabelItem):
         brush = self.brush()
         brush.setColor(QColor(color))
         self.setBrush(brush)
+        self.pen.setColor(QColor(color))
         self.update()
     
 class LinePoint(QGraphicsEllipseItem, LabelItem):
@@ -135,9 +137,9 @@ class MyLineItem(QGraphicsLineItem, LabelItem):
     EditMode = False
     def __init__(self, x1, y1, x2, y2,parent=None):
         super().__init__(x1, y1, x2, y2, parent)
-        pen = QPen(QColor(Qt.black))
-        pen.setWidth(3)
-        self.setPen(pen)
+        self.pen = QPen(QColor(Qt.black))
+        self.pen.setWidth(3)
+        self.setPen(self.pen)
         self.point1 = LinePoint(x1, y1, parent=self)
         self.point2 = LinePoint(x2, y2, parent=self)
 
@@ -174,7 +176,7 @@ class MyLineItem(QGraphicsLineItem, LabelItem):
                 point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
 
     def setLineColor(self, color):
-        pen = self.pen()
+        pen = self.pen
         pen.setColor(QColor(color))
         self.setPen(pen)
         self.update()
