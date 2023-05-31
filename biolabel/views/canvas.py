@@ -19,7 +19,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     UILabelList = []
     issueLabelCommand = pyqtSignal(str, str, list) # cmd, type, ptlist
     issueUpdateLabelCommand = pyqtSignal(float, float, int , object) # cmd, type, ptlist
-    issueLabelNameDialogShow = pyqtSignal(str) 
+    issueLabelNameDialogShow = pyqtSignal() 
     inputLabelNameSuccess = False
     keycode = None
     PressItem = None

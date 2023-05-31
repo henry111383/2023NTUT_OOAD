@@ -370,8 +370,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # ======== message ========
     def wrongFormatDialog(self, msg):
         dlg = QMessageBox()
-        # dlg.setWindowTitle('D')
         dlg.setText(msg)
         button = dlg.exec()
-        # button = QPushButton("Press me for a dialog!")
 
