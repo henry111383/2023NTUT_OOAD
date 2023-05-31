@@ -66,8 +66,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.issueLabelCommand.connect(self.issueCreateLabelCommand)
         # issueUpdateLabelCommand
         self.ui.canvas.scene.issueUpdateLabelCommand.connect(self.issueMoveLabelCommand)
-        # issueShowDialogLabelCommand
+        # issueLabelNameDialogShow
         self.ui.canvas.scene.issueLabelNameDialogShow.connect(self.LabelNameDialogShow)
+        # issueDeleteLabelCommand
+        self.ui.canvas.scene.issueDeleteLabelCommand.connect(self.issueDeleteLabelCommand)
 
         #LabelNameDialogButton
         self.ui.canvas.scene.LabelNameDialog.AddLabelName.connect(self.LabelNameAccept)
@@ -329,6 +331,15 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def issueEditLabelColorCommand(self, color , Label):
         self.labelService.EditLabelColor(color , Label) 
 
+    def issueDeleteLabelCommand(self,  Label):
+        UILabelList = self.ui.LabelListWidget
+        for index in range(UILabelList.count()):
+            item = UILabelList.item(index)
+            data = item.data(4)  # 获取项目的数据，这里假设使用data(5)
+            if data == Label:
+                UILabelList.takeItem(index)  # 从列表中移除项目
+        self.labelService.DeleteLabel(Label) 
+    
     # Call DIPService
     def issueImageProcessCommand(self, str):
         # revision channel name

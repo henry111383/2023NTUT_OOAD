@@ -35,9 +35,11 @@ class LabelService():
         Label.SetLabelColor(color)
         return Label
     
-    def DeleteLabel(self , index ) :
-        if index :
-            if len(self.labelList) > index:
-                del self.labelList[index]
-        return
+    def DeleteLabel(self , label ) :
+        try:
+            self.labelList.RemoveLabel(label)
+            return True
+        except:
+            print('Error! Not Found This Label')
+            return False
     
