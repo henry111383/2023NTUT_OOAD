@@ -26,6 +26,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     current_file = []
     original_img = None
     current_img = None
+    current_channel = 'RGB'
     imgItem = None
     LabelNameList = []
 
@@ -50,13 +51,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.actionOpen.triggered.connect(self.open_file)
         self.ui.actionOpenFolder.triggered.connect(self.open_folder)
         self.ui.actionExit.triggered.connect(lambda: exit())
+        self.ui.actionSave.triggered.connect(self.saveMyLabel)
+        # self.ui.actionSave_as.triggered.connect(self.)
+        self.ui.actionExportImage.triggered.connect(self.exportImage)
+        self.ui.actionExportLabel.triggered.connect(self.exportLabel)
 
         # toolBotton
         self.ui.actionCreateLabel.triggered.connect(self.Click_CreateLabel)
         self.ui.actionEditLabel.triggered.connect(self.Click_EditLabel)
         self.ui.actionDIP.triggered.connect(self.Click_DIP)
-        self.ui.actionSave.triggered.connect(self.saveMyLabel)
-        # self.ui.actionSave_as.triggered.connect(self.)
+       
 
         # issueCreateLabelCommand
         self.ui.canvas.scene.issueLabelCommand.connect(self.issueCreateLabelCommand)
@@ -153,7 +157,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.resetMode()
                 self.ui.canvas.scene.ImgLoad = True
             else:
-                self.wrongFormatDialog('Not Supported Format')
+                self.errorDialog('Not Supported Format')
 
     # === MenuBar action :OpenDir ===
     def open_folder(self):
@@ -185,6 +189,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # read image to view
     def read_img_to_view(self, imgFile):
         self.original_img = self.fileService.LoadImage(self.current_file)
+        self.current_img  = self.original_img
         if self.original_img :
             # reset the view
             self.ui.canvas.scene.clear()
@@ -328,7 +333,15 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     # Call DIPService
     def issueImageProcessCommand(self, str):
+        # revision channel name
+        if 'RGB' in str:
+            self.current_img.SetChannel(str.replace('RGB2',''))
+        elif 'OTSUbinary' in str:
+            self.current_img.SetChannel('binary')
+        # DIP
         if str == 'Back2Original':
+            self.current_img.SetChannel('RGB')
+            self.current_img = self.original_img
             # get size of image
             h, w, _ = self.original_img.GetImg().shape
             # set QImage
@@ -336,7 +349,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             # set QPixmanp
             pix = QPixmap.fromImage(qImg)
             self.imgItem.setPixmap(pix)
-            
         else:
             self.current_img = eval(f'self.imageProcessService.{str}(self.original_img)')
             img = self.current_img.GetImg()
@@ -348,28 +360,43 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             pix = QPixmap.fromImage(qImg)
             self.imgItem.setPixmap(pix)
 
-
     # Save My label to Json
     def saveMyLabel(self):
-        current_labellist = self.labelService.labelList
-        # into File
-        MyLabelFile = self.fileService.ConvertLabel2File(label=current_labellist)
-        # save LabelFile
-        FileName = os.path.splitext(self.current_file)[0] + '.json'
-        MyLabelFile.SetFileLocation(FileName)
-        print(FileName)
-        self.fileService.StoreLabel(LF=MyLabelFile, format='My')
+        if self.labelService.labelList.GetLabelList() :
+            current_labellist = self.labelService.labelList
+            # into File
+            MyLabelFile = self.fileService.ConvertLabel2File(label=current_labellist)
+            # save LabelFile
+            FileName = os.path.splitext(self.current_file)[0] + '.json'
+            MyLabelFile.SetFileLocation(FileName)
+            self.fileService.StoreLabel(LF=MyLabelFile, format='My')
+        else :
+            self.errorDialog('No any existing label!')
         
-    # Save DIP image 
+    # export DIP image 
     def exportImage(self):
-        pass
+        filter_str = "PNG Files (*.png);;TIF Files (*.tif);;All Files (*)"
+        if self.current_img :
+            file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", filter_str)
+            print(file_name)
+            MyImagefile = self.fileService.ConvertImage2File(img=self.current_img)
+            if self.fileService.StoreImage(IF=MyImagefile, fileLocation=file_name):
+                return
+            else:
+                self.errorDialog('Something Wrong!')
+        else :
+            self.errorDialog('No image can be exported!')
 
-
+    def exportLabel(self):
+        print('exportLabel')
 
 
     # ======== message ========
-    def wrongFormatDialog(self, msg):
+    def errorDialog(self, msg):
         dlg = QMessageBox()
         dlg.setText(msg)
         button = dlg.exec()
+
+    # export 
+
 
