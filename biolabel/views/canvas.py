@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QRectF, Qt, QPointF , QLineF , QSize, pyqtSignal, QEvent, QTimer
-from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap, QMouseEvent,QTransform
+from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap, QMouseEvent,QTransform, QWheelEvent
 from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QMessageBox,QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets
 import cv2
@@ -132,12 +132,14 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             if self.shape == 'line':
                 if self.drawing:
                     self.tempLabel.setEndPoint(pos.x(),pos.y())
-                    self.tempLabel.updateLine()
+                    self.tempLabel.updatePath()
             if self.shape == 'linestrip' or self.shape == "poly":
                 if self.drawing:
                     self.tempLabel.setLastPoint(pos.x(),pos.y())
                     self.tempLabel.updatePath()
+        # elif self.EditMode:        
         return
+    
     def mouseReleaseEvent(self, event):
         # 滑鼠移動事件
         super(MyScene, self).mouseReleaseEvent(event)
@@ -161,6 +163,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                     print(item)
                     print(self.PressItem)
         return
+    
     def isOutofScene(self, pt):
         w, h = self.width(), self.height()
         return not (0 <= pt.GetX() <= w - 1 and 0 <= pt.GetY() <= h - 1)
@@ -248,6 +251,26 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         self.msg_box.setWindowTitle("確認刪除")
         self.msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         self.msg_box.setDefaultButton(QMessageBox.No)
+
+    def wheelEvent(self, event: QWheelEvent):
+        # self.keycode = event.key()
+        # print(self.keycode)
+        # if self.keycode == 16777216: # esc
+        #     self.resetDrawing()
+        zoom_in_factor = 1.1
+        zoom_out_factor = 0.9
+
+        # 根據滾輪的方向進行放大或縮小
+        if event.delta() > 0:
+            zoom_factor = zoom_in_factor
+        else:
+            zoom_factor = zoom_out_factor
+
+        # 更新 QGraphicsView 的縮放比例
+        view = self.views()[0]  # 假設只有一個 QGraphicsView
+        view.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        view.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
+        view.scale(zoom_factor, zoom_factor)
 
 class GraphicView(QGraphicsView):
     def __init__(self, parent=None):

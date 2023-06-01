@@ -130,6 +130,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ChangeLabelSelectable()
             self.CheckCursorStyle()
             self.CreateLabelmenu.exec_(QCursor.pos())
+            self.ui.canvas.scene.resetDrawing()
         
     # === toolBotton action : Edit Label ===    
     def Click_EditLabel(self):
@@ -373,7 +374,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # Save My label to Json
     def saveMyLabel(self):
         if self.original_img :
-            # if self.labelService.labelList.GetLabelList() :
             current_labellist = self.labelService.labelList
             # into File
             MyLabelFile = self.fileService.ConvertLabel2File(label=current_labellist)

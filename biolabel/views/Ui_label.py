@@ -38,13 +38,14 @@ class MyPointItem(QGraphicsEllipseItem, LabelItem):
             if event.buttons() == Qt.LeftButton:
                 self.setPos(pos)
             # super().mouseMoveEvent(event)
+        
 
-    def mouseReleaseEvent(self, event):
-        if self.EditMode:
-            pos = event.scenePos()
-            self.endPos = pos
-            self.setPos(pos)
-            # self.Movement = self.endPos - self.startPos 
+    # def mouseReleaseEvent(self, event):
+    #     if self.EditMode:
+    #         pos = event.scenePos()
+    #         self.endPos = pos
+    #         self.setPos(pos)
+    #         # self.Movement = self.endPos - self.startPos 
 
     def setLineColor(self, color):
         brush = self.brush()
@@ -67,7 +68,7 @@ class LinePoint(QGraphicsEllipseItem, LabelItem):
             if isinstance(self.parentItem(), MyLineStrip) and  change == QGraphicsEllipseItem.ItemScenePositionHasChanged:
                 self.parentItem().updatePath()
             elif isinstance(self.parentItem(), MyLineItem) and change == QGraphicsEllipseItem.ItemScenePositionHasChanged:
-                self.parentItem().updateLine()
+                self.parentItem().updatePath()
             elif isinstance(self.parentItem(), MyRectItem) and change == QGraphicsEllipseItem.ItemScenePositionHasChanged:
                 self.parentItem().updatePath()
         return super().itemChange(change, value)
@@ -117,17 +118,17 @@ class MyRectItem(QGraphicsPathItem, LabelItem):
         
         
     def mouseMoveEvent(self, event):
-        if self.EditMode:
+        if self.EditMode :
             for point_item in self.childItems():
                 point_item.setPos(point_item.pos() + event.pos() - event.lastPos())
             self.updatePath()
 
-    def mouseReleaseEvent(self, event):
-        if self.EditMode:
-            pos = event.scenePos()
-            self.endPos = pos
-            for i, point_item in enumerate(self.childItems()) :
-                point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
+    # def mouseReleaseEvent(self, event):
+    #     if self.EditMode:
+    #         pos = event.scenePos()
+    #         self.endPos = pos
+    #         for i, point_item in enumerate(self.childItems()) :
+    #             point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
 
     def setLineColor(self, color):
         self.pen.setColor(QColor(color))
@@ -143,7 +144,7 @@ class MyLineItem(QGraphicsLineItem, LabelItem):
         self.point1 = LinePoint(x1, y1, parent=self)
         self.point2 = LinePoint(x2, y2, parent=self)
 
-    def updateLine(self):
+    def updatePath(self):
         start = self.point1.scenePos()
         end = self.point2.scenePos()
         self.setLine(start.x(), start.y(), end.x(), end.y())
@@ -168,12 +169,12 @@ class MyLineItem(QGraphicsLineItem, LabelItem):
                 point_item.setPos(point_item.pos() + event.pos() - event.lastPos())
             self.updateLine()
 
-    def mouseReleaseEvent(self, event):
-        if self.EditMode:
-            pos = event.scenePos()
-            self.endPos = pos
-            for i, point_item in enumerate(self.childItems()) :
-                point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
+    # def mouseReleaseEvent(self, event):
+    #     if self.EditMode:
+    #         pos = event.scenePos()
+    #         self.endPos = pos
+    #         for i, point_item in enumerate(self.childItems()) :
+    #             point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
 
     def setLineColor(self, color):
         pen = self.pen
