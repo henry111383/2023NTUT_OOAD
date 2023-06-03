@@ -53,7 +53,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.actionOpenFolder.triggered.connect(self.open_folder)
         self.ui.actionExit.triggered.connect(lambda: exit())
         self.ui.actionSave.triggered.connect(self.saveMyLabel)
-        # self.ui.actionSave_as.triggered.connect(self.)
+        self.ui.actionSave_as.triggered.connect(self.saveAs)
         self.ui.actionExportImage.triggered.connect(self.exportImage)
         self.ui.actionExportLabel.triggered.connect(self.exportLabel)
 
@@ -83,7 +83,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         create_line_option = self.CreateLabelmenu.addAction('Create Line')
         create_linestrip_option = self.CreateLabelmenu.addAction('Create LineStrip')
         create_point_option = self.CreateLabelmenu.addAction('Create Point')
-        undo_option = self.CreateLabelmenu.addAction('Undo')
+        
         # Menu option events
         create_polygons_option.triggered.connect(lambda: self.ui.canvas.scene.ChangeShape("poly"))
         create_rect_option.triggered.connect(lambda: self.ui.canvas.scene.ChangeShape("rect"))
@@ -176,7 +176,21 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def open_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Open folder", "./")
         print(folder_path)
-        # print(self.current_file)
+        # UILabelList = self.ui.LabelListWidget
+        # self.LabelNameList.clear()
+        # for index in range(UILabelList.count()):
+        #     item = UILabelList.item(index)
+        #     data = item.data(4).GetName()
+        #     self.LabelNameList.append(data)
+        # self.LabelNameList = list(set(self.LabelNameList))
+        # # reset the list
+        # self.ui.canvas.scene.LabelNameDialog.LabelNameList.clear()
+        # self.ui.LabelNameList.clear()
+        # for Name in self.LabelNameList:
+        #     self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(Name)
+        #     self.ui.LabelNameList.addItem(Name)
+
+        
 
     # reset Mode after OpenFile
     def resetMode(self):
@@ -192,7 +206,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.LabelNameList.clear()  
         # ViewWidgets
         self.ui.LabelNameList.clear()
-        # ViewWidgets
+        self.ui.LabelListWidget.clear()
         self.ui.canvas.scene.LabelNameDialog.LabelNameList.clear()
         self.labelService.labelList.ClearAllLabel()
         self.ui.canvas.scene.UILabelList.clear()
@@ -487,18 +501,34 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.fileService.StoreLabel(LF=MyLabelFile, format='My')
         else :
             self.errorDialog('No any existing image!')
-        
+            
+    # Save label by other name 
+    def saveAs(self):
+        if self.current_img:
+            file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", 'JSON (*.json)')
+            print(file_name)
+            if file_name:
+                current_labellist = self.labelService.labelList
+                # into File
+                MyLabelFile = self.fileService.ConvertLabel2File(label=current_labellist)
+                # save LabelFile
+                MyLabelFile.SetFileLocation(file_name)
+                self.fileService.StoreLabel(LF=MyLabelFile, format='My')
+        else :
+            self.errorDialog('No any existing image!')
+
     # Export DIP image 
     def exportImage(self):
         filter_str = "PNG Files (*.png);;TIF Files (*.tif);;All Files (*)"
         if self.current_img :
             file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", filter_str)
             print(file_name)
-            MyImagefile = self.fileService.ConvertImage2File(img=self.current_img)
-            if self.fileService.StoreImage(IF=MyImagefile, fileLocation=file_name):
-                return
-            else:
-                self.errorDialog('Something Wrong!')
+            if file_name:
+                MyImagefile = self.fileService.ConvertImage2File(img=self.current_img)
+                if self.fileService.StoreImage(IF=MyImagefile, fileLocation=file_name):
+                    return
+                else:
+                    self.errorDialog('Something Wrong!')
         else :
             self.errorDialog('No image can be exported!')
 
