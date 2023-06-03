@@ -3,6 +3,7 @@ from .ImageFile import ImageFile
 from .LabelFile import LabelFile
 from .LabelList import LabelList
 from .Image import Image
+import os
 import cv2
 import json
 class FileService():
@@ -51,8 +52,24 @@ class FileService():
         
 
     
-    def LoadLabel(self, fileLocation:str)-> LabelList:
-        pass    #todo 
+    def LoadUILabel(self, fileLocation:str)-> dict:
+        if os.path.exists(fileLocation):
+            print('Json Exists!')
+            with open(fileLocation) as f:
+                data = json.load(f)
+                try :
+                    if ["Name", "Color", "Type", "Points"] == list(data['0'].keys()):
+                        print('is Our JSON')
+                        return data
+                    else :
+                        print('not our JSON')
+                        return dict()
+                except :
+                    return dict()
+        else: # file doesnt exists 
+            print('Json doesnt Exists!')
+            return dict()
+        
 
     def ConvertLabel2File(self, label:LabelList )-> LabelFile: 
         return LabelFile(labelList=label)

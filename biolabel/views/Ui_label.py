@@ -167,7 +167,7 @@ class MyLineItem(QGraphicsLineItem, LabelItem):
         if self.EditMode:
             for point_item in self.childItems():
                 point_item.setPos(point_item.pos() + event.pos() - event.lastPos())
-            self.updateLine()
+            self.updatePath()
 
     # def mouseReleaseEvent(self, event):
     #     if self.EditMode:
