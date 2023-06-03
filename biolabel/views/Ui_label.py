@@ -34,25 +34,22 @@ class MyPointItem(QGraphicsEllipseItem, LabelItem):
     def mouseMoveEvent(self, event):
         # 在滑鼠移動時更新點的位置
         pos = event.scenePos()
-        if self.EditMode :
+        if self.EditMode and not self.OutofBoundary():
             if event.buttons() == Qt.LeftButton:
                 self.setPos(pos)
-            # super().mouseMoveEvent(event)
-        
 
-    # def mouseReleaseEvent(self, event):
-    #     if self.EditMode:
-    #         pos = event.scenePos()
-    #         self.endPos = pos
-    #         self.setPos(pos)
-    #         # self.Movement = self.endPos - self.startPos 
-
-    def setLineColor(self, color):
-        brush = self.brush()
-        brush.setColor(QColor(color))
-        self.setBrush(brush)
-        self.pen.setColor(QColor(color))
-        self.update()
+    def OutofBoundary(self,event):
+        for point_item in self.childItems():
+            bounds_rect = self.scene().sceneRect()
+            new_pos = point_item.pos() + event.pos() - event.lastPos()
+            if not bounds_rect.contains(new_pos)  :
+                return True
+        return False
+    
+    def getAllpoints(self):
+        points=[]
+        points.append(self.pos())
+        return points
     
 class LinePoint(QGraphicsEllipseItem, LabelItem):
     EditMode = False
@@ -66,11 +63,32 @@ class LinePoint(QGraphicsEllipseItem, LabelItem):
     def itemChange(self, change, value):
         if not self.parentItem().isSelected():
             if isinstance(self.parentItem(), MyLineStrip) and  change == QGraphicsEllipseItem.ItemScenePositionHasChanged:
-                self.parentItem().updatePath()
+                new_pos = value
+                bounds_rect = self.parentItem().scene().sceneRect()
+                if not bounds_rect.contains(new_pos)  :
+                    # 如果超出邊界，將新位置更改為邊界內的最近位置
+                    new_pos.setX(min(bounds_rect.right(), max(bounds_rect.left(), new_pos.x())))
+                    new_pos.setY(min(bounds_rect.bottom(), max(bounds_rect.top(), new_pos.y())))
+                    self.setPos(new_pos) 
+                self.parentItem().updatePath() 
             elif isinstance(self.parentItem(), MyLineItem) and change == QGraphicsEllipseItem.ItemScenePositionHasChanged:
-                self.parentItem().updatePath()
+                new_pos = value
+                bounds_rect = self.parentItem().scene().sceneRect()
+                if not bounds_rect.contains(new_pos)  :
+                    # 如果超出邊界，將新位置更改為邊界內的最近位置
+                    new_pos.setX(min(bounds_rect.right(), max(bounds_rect.left(), new_pos.x())))
+                    new_pos.setY(min(bounds_rect.bottom(), max(bounds_rect.top(), new_pos.y())))
+                    self.setPos(new_pos) 
+                self.parentItem().updatePath() 
             elif isinstance(self.parentItem(), MyRectItem) and change == QGraphicsEllipseItem.ItemScenePositionHasChanged:
-                self.parentItem().updatePath()
+                new_pos = value
+                bounds_rect = self.parentItem().scene().sceneRect()
+                if not bounds_rect.contains(new_pos)  :
+                    # 如果超出邊界，將新位置更改為邊界內的最近位置
+                    new_pos.setX(min(bounds_rect.right(), max(bounds_rect.left(), new_pos.x())))
+                    new_pos.setY(min(bounds_rect.bottom(), max(bounds_rect.top(), new_pos.y())))
+                    self.setPos(new_pos) 
+                self.parentItem().updatePath()    
         return super().itemChange(change, value)
                
 class MyRectItem(QGraphicsPathItem, LabelItem):
@@ -82,7 +100,7 @@ class MyRectItem(QGraphicsPathItem, LabelItem):
         self.brush = QBrush(QColor(0, 0, 0, 0))
         self.point1 = LinePoint(x1, y1, parent=self)
         self.point2 = LinePoint(x2, y2, parent=self)
-
+    
 
     def updatePath(self):
         self.path = QPainterPath()
@@ -109,6 +127,7 @@ class MyRectItem(QGraphicsPathItem, LabelItem):
         self.childItems()[-1].setPos(x,y)
 
     def mousePressEvent(self, event):
+        
         if self.EditMode:
             pos = event.scenePos()
             self.startPos = pos
@@ -116,24 +135,30 @@ class MyRectItem(QGraphicsPathItem, LabelItem):
             for point_item in self.childItems():
                 self.allItem_pos.append(point_item.pos())
         
-        
     def mouseMoveEvent(self, event):
-        if self.EditMode :
+        if self.EditMode and not self.OutofBoundary(event):
             for point_item in self.childItems():
                 point_item.setPos(point_item.pos() + event.pos() - event.lastPos())
             self.updatePath()
 
-    # def mouseReleaseEvent(self, event):
-    #     if self.EditMode:
-    #         pos = event.scenePos()
-    #         self.endPos = pos
-    #         for i, point_item in enumerate(self.childItems()) :
-    #             point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
-
     def setLineColor(self, color):
         self.pen.setColor(QColor(color))
         self.updatePath()     
-               
+
+    def OutofBoundary(self,event):
+        for point_item in self.childItems():
+            bounds_rect = self.scene().sceneRect()
+            new_pos = point_item.pos() + event.pos() - event.lastPos()
+            if not bounds_rect.contains(new_pos)  :
+                return True
+        return False
+    
+    def getAllpoints(self):
+        points=[]
+        for point_item in self.childItems():  
+            points.append(point_item.pos())
+        return points
+    
 class MyLineItem(QGraphicsLineItem, LabelItem):
     EditMode = False
     def __init__(self, x1, y1, x2, y2,parent=None):
@@ -164,24 +189,31 @@ class MyLineItem(QGraphicsLineItem, LabelItem):
                 self.allItem_pos.append(point_item.pos())
 
     def mouseMoveEvent(self, event):
-        if self.EditMode:
+        if self.EditMode and not self.OutofBoundary(event):
             for point_item in self.childItems():
                 point_item.setPos(point_item.pos() + event.pos() - event.lastPos())
-            self.updateLine()
-
-    # def mouseReleaseEvent(self, event):
-    #     if self.EditMode:
-    #         pos = event.scenePos()
-    #         self.endPos = pos
-    #         for i, point_item in enumerate(self.childItems()) :
-    #             point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
+            self.updatePath()
 
     def setLineColor(self, color):
         pen = self.pen
         pen.setColor(QColor(color))
         self.setPen(pen)
         self.update()
-
+        
+    def OutofBoundary(self,event):
+        for point_item in self.childItems():
+            bounds_rect = self.scene().sceneRect()
+            new_pos = point_item.pos() + event.pos() - event.lastPos()
+            if not bounds_rect.contains(new_pos)  :
+                return True
+        return False
+    
+    def getAllpoints(self):
+        points=[]
+        for point_item in self.childItems():  
+            points.append(point_item.pos())
+        return points
+    
 class MyLineStrip(QGraphicsPathItem, LabelItem):
     EditMode = False
     def __init__(self, points: List[Tuple[float, float]], shape="linestrip", parent=None):
@@ -228,17 +260,10 @@ class MyLineStrip(QGraphicsPathItem, LabelItem):
                 self.allItem_pos.append(point_item.pos())
         
     def mouseMoveEvent(self, event):
-        if self.EditMode:
+        if self.EditMode and not self.OutofBoundary(event):
             for point_item in self.childItems():
                 point_item.setPos(point_item.pos() + event.pos() - event.lastPos())
             self.updatePath()
-
-    def mouseReleaseEvent(self, event):
-        if self.EditMode:
-            pos = event.scenePos()
-            self.endPos = pos
-            for i, point_item in enumerate(self.childItems()) :
-                point_item.setPos(self.allItem_pos[i] + self.endPos - self.startPos)
 
     def setShape(self,shape : str):
         self.shape=shape
@@ -262,4 +287,18 @@ class MyLineStrip(QGraphicsPathItem, LabelItem):
         pen.setColor(QColor(color))
         self.setPen(pen)
         self.update()
-            
+
+    def OutofBoundary(self,event):
+        for point_item in self.childItems():
+            bounds_rect = self.scene().sceneRect()
+            new_pos = point_item.pos() + event.pos() - event.lastPos()
+            if not bounds_rect.contains(new_pos)  :
+                return True
+        return False   
+
+    def getAllpoints(self):
+        points=[]
+        for point_item in self.childItems():  
+            points.append(point_item.pos())
+        return points
+    

@@ -18,7 +18,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
     tempLabel = None
     UILabelList = []
     issueLabelCommand = pyqtSignal(str, str ,str, list) # cmd, type, ptlist
-    issueUpdateLabelCommand = pyqtSignal(float, float, int , object) # cmd, type, ptlist
+    issueUpdateLabelCommand = pyqtSignal(list , object) # cmd, type, ptlist
     issueLabelNameDialogShow = pyqtSignal(str) 
     issueDeleteLabelCommand = pyqtSignal(object) 
     inputLabelNameSuccess = False
@@ -144,29 +144,42 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         # 滑鼠移動事件
         super(MyScene, self).mouseReleaseEvent(event)
         pos = event.scenePos()
-        moveX = pos.x() - self.x  
-        moveY = pos.y() - self.y
         if self.ImgLoad and self.EditMode:
             item = self.itemAt(pos, QTransform())
-            if self.CheckLabelInUiLabel(item):
-                parent= item.parentItem()
-                index = 0
-                if (item is self.PressItem) :
-                    if parent == None :
-                        index = len(item.childItems())
-                        print(index)
-                        self.issueUpdateLabelCommand.emit( moveX , moveY , index , item.label) ###
-                    else:
-                        index = parent.childItems().index(item)
-                        self.issueUpdateLabelCommand.emit( moveX , moveY , index , parent.label) ###
-                else : 
-                    print(item)
-                    print(self.PressItem)
+            if self.CheckLabelInUiLabel(item) | self.isOutofScene(pos):
+                if item != None:
+                    parent= item.parentItem()
+                    if (item is self.PressItem) :
+                        if parent == None :
+                            ptlist = item.getAllpoints()
+                            self.issueUpdateLabelCommand.emit( ptlist , item.label) ###
+                        else:
+                            ptlist = parent.getAllpoints()
+                            self.issueUpdateLabelCommand.emit( ptlist , parent.label) ###
+                    else : 
+                        print(item)
+                        print(self.PressItem)
+                else:
+                    if self.PressItem != None:
+                        if isinstance(self.PressItem,LinePoint) :
+                            parent = self.PressItem.parentItem()
+                            ptlist = parent.getAllpoints()
+                            self.issueUpdateLabelCommand.emit( ptlist, parent.label) ###
+                        else :
+                            ptlist = self.PressItem.getAllpoints()
+                            self.issueUpdateLabelCommand.emit( ptlist  , self.PressItem.label) ### 
+            else : 
+                print("sad")
+            self.PressItem = None
         return
     
     def isOutofScene(self, pt):
-        w, h = self.width(), self.height()
-        return not (0 <= pt.GetX() <= w - 1 and 0 <= pt.GetY() <= h - 1)
+        if isinstance(pt , Point):
+            w, h = self.width(), self.height()
+            return not (0 <= pt.GetX() <= w - 1 and 0 <= pt.GetY() <= h - 1)
+        elif isinstance(pt ,QPointF):
+            w, h = self.width(), self.height()
+            return not (0 <= pt.x() <= w - 1 and 0 <= pt.y() <= h - 1)
 
     def resetDrawing(self):
         if self.points :
