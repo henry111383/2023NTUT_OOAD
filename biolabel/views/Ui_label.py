@@ -22,30 +22,32 @@ class MyPointItem(QGraphicsEllipseItem, LabelItem):
         self.setPen(self.pen)
         self.setFlag(self.ItemIsSelectable)
         self.setFlag(self.ItemIsMovable)
-    
-
+        
     def mousePressEvent(self, event):
         if self.EditMode:
             pos = event.scenePos()
             self.startPos = pos
             self.item_pos = self.pos()
-        
-        
+
     def mouseMoveEvent(self, event):
-        # 在滑鼠移動時更新點的位置
-        pos = event.scenePos()
-        if self.EditMode and not self.OutofBoundary():
+        if self.EditMode and not self.OutofBoundary(event):
             if event.buttons() == Qt.LeftButton:
-                self.setPos(pos)
+                self.setPos(self.pos() + event.pos() - event.lastPos())     
 
     def OutofBoundary(self,event):
-        for point_item in self.childItems():
-            bounds_rect = self.scene().sceneRect()
-            new_pos = point_item.pos() + event.pos() - event.lastPos()
-            if not bounds_rect.contains(new_pos)  :
-                return True
+        bounds_rect = self.scene().sceneRect()
+        new_pos = self.pos() + event.pos() - event.lastPos()
+        if not bounds_rect.contains(new_pos)  :
+            return True
         return False
     
+    def setLineColor(self, color):
+        brush = self.brush()
+        brush.setColor(QColor(color))
+        self.setBrush(brush)
+        self.pen.setColor(QColor(color))
+        self.update()
+
     def getAllpoints(self):
         points=[]
         points.append(self.pos())

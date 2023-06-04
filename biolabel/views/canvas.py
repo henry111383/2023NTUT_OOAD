@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QRectF, Qt, QPointF , QLineF , QSize, pyqtSignal, QEvent, QTimer
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QBrush,QFont, QColor ,QIcon, QPixmap, QMouseEvent,QTransform, QWheelEvent
-from PyQt5.QtWidgets import QLabel, QGraphicsRectItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QMessageBox,QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QLabel, QGraphicsRectItem,QGraphicsPixmapItem, QApplication, QGraphicsView, QGraphicsScene,QWidget ,QGraphicsItem , QMessageBox,QGraphicsPathItem,QDialog,QGraphicsTextItem, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets
 import cv2
 from model.Point import Point
@@ -160,7 +160,7 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
                         print(item)
                         print(self.PressItem)
                 else:
-                    if self.PressItem != None:
+                    if self.PressItem != None and not isinstance(self.PressItem,QGraphicsPixmapItem):
                         if isinstance(self.PressItem,LinePoint) :
                             parent = self.PressItem.parentItem()
                             ptlist = parent.getAllpoints()
