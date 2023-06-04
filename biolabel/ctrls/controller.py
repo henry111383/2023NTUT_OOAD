@@ -7,6 +7,7 @@ from views.canvas import *
 import os
 import numpy as np
 import cv2
+from views.Ui_label import *
 from model.LabelService import LabelService
 from model.ImageProcessService import ImageProcessService
 from model.FileService import FileService
@@ -52,7 +53,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.actionOpenFolder.triggered.connect(self.open_folder)
         self.ui.actionExit.triggered.connect(lambda: exit())
         self.ui.actionSave.triggered.connect(self.saveMyLabel)
-        # self.ui.actionSave_as.triggered.connect(self.)
+        self.ui.actionSave_as.triggered.connect(self.saveAs)
         self.ui.actionExportImage.triggered.connect(self.exportImage)
         self.ui.actionExportLabel.triggered.connect(self.exportLabel)
 
@@ -82,7 +83,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         create_line_option = self.CreateLabelmenu.addAction('Create Line')
         create_linestrip_option = self.CreateLabelmenu.addAction('Create LineStrip')
         create_point_option = self.CreateLabelmenu.addAction('Create Point')
-        undo_option = self.CreateLabelmenu.addAction('Undo')
+        
         # Menu option events
         create_polygons_option.triggered.connect(lambda: self.ui.canvas.scene.ChangeShape("poly"))
         create_rect_option.triggered.connect(lambda: self.ui.canvas.scene.ChangeShape("rect"))
@@ -153,7 +154,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     # === MenuBar action : OpenFile ===
     def open_file(self):
         self.current_file, filetype = QFileDialog.getOpenFileName(self, "Open file", "./")
+        MyJsonName = os.path.dirname(self.current_file) \
+                    + '/' \
+                    + os.path.splitext(os.path.basename(self.current_file))[0] \
+                    + '.json'
+        
         print(self.current_file, filetype)
+        print(MyJsonName)
+
         if self.current_file :
             self.read_img_to_view(self.current_file)
             if self.original_img :
@@ -161,12 +169,28 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.ui.canvas.scene.ImgLoad = True
             else:
                 self.errorDialog('Not Supported Format')
+            self.read_labels_to_view(MyJsonName)
+
 
     # === MenuBar action :OpenDir ===
     def open_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Open folder", "./")
         print(folder_path)
-        # print(self.current_file)
+        # UILabelList = self.ui.LabelListWidget
+        # self.LabelNameList.clear()
+        # for index in range(UILabelList.count()):
+        #     item = UILabelList.item(index)
+        #     data = item.data(4).GetName()
+        #     self.LabelNameList.append(data)
+        # self.LabelNameList = list(set(self.LabelNameList))
+        # # reset the list
+        # self.ui.canvas.scene.LabelNameDialog.LabelNameList.clear()
+        # self.ui.LabelNameList.clear()
+        # for Name in self.LabelNameList:
+        #     self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(Name)
+        #     self.ui.LabelNameList.addItem(Name)
+
+        
 
     # reset Mode after OpenFile
     def resetMode(self):
@@ -182,7 +206,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.LabelNameList.clear()  
         # ViewWidgets
         self.ui.LabelNameList.clear()
-        # ViewWidgets
+        self.ui.LabelListWidget.clear()
         self.ui.canvas.scene.LabelNameDialog.LabelNameList.clear()
         self.labelService.labelList.ClearAllLabel()
         self.ui.canvas.scene.UILabelList.clear()
@@ -190,8 +214,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
 
     # read image to view
-    def read_img_to_view(self, imgFile):
-        self.original_img = self.fileService.LoadImage(self.current_file)
+    def read_img_to_view(self, imgFileLocation):
+        self.original_img = self.fileService.LoadImage(imgFileLocation)
         self.current_img  = self.original_img
         if self.original_img :
             # reset the view
@@ -209,10 +233,84 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ui.canvas.setAlignment(Qt.AlignTop | Qt.AlignCenter)
         return
     
-    def store_current_img(self, img, name, directory, format):
-        pass  #todo
-        # imgFile = self.fileService.ConvertImage2File(self.current_img)
-        # self.fileService.StoreImage()
+    # read labels to view
+    def read_labels_to_view(self, JsonFileName):
+        self.resetComponent()
+        labelUI_dict = self.fileService.LoadUILabel(JsonFileName)
+        if len(labelUI_dict) == 0:
+            self.labelService.labelList = LabelList()
+        else: 
+            for key in labelUI_dict.keys():
+                UIlabel = labelUI_dict[key]
+                self.templabelName = UIlabel['Name']
+                color = UIlabel['Color']
+                ptList = []
+                for pt in UIlabel['Points']:
+                    ptList.append(Point(pt[0], pt[1]))
+                labelType = UIlabel['Type']
+                # print(UIlabel)
+                if labelType == 'rect':
+                    # create UIlabel (Rectengle)
+                    self.ui.canvas.scene.tempLabel = MyRectItem(ptList[0].GetX(), ptList[0].GetY(), ptList[1].GetX(), ptList[1].GetY())
+                    self.issueCreateLabelCommand('CreateLabel', color ,labelType, ptList)
+                    self.ui.canvas.scene.tempLabel.label.SetLabelColor(color)
+                    self.ui.canvas.scene.UILabelList.append(self.ui.canvas.scene.tempLabel)
+                    self.ui.canvas.scene.addItem(self.ui.canvas.scene.tempLabel)
+                    self.ui.canvas.scene.tempLabel.setLineColor(color)
+                    self.AddLabelNameList(self.templabelName)
+                    
+                elif labelType == 'point':
+                    # create UIlabel (Point)
+                    self.ui.canvas.scene.tempLabel = MyPointItem(ptList[0].GetX(), ptList[0].GetY())
+                    self.issueCreateLabelCommand('CreateLabel', color ,labelType, ptList)
+                    self.ui.canvas.scene.tempLabel.label.SetLabelColor(color)
+                    self.ui.canvas.scene.UILabelList.append(self.ui.canvas.scene.tempLabel)
+                    self.ui.canvas.scene.addItem(self.ui.canvas.scene.tempLabel)
+                    self.ui.canvas.scene.tempLabel.setLineColor(color)
+                    self.AddLabelNameList(self.templabelName)
+
+                elif labelType == 'line':
+                    # create UIlabel (Line)
+                    self.ui.canvas.scene.tempLabel = MyLineItem(ptList[0].GetX(), ptList[0].GetY(), ptList[1].GetX(), ptList[1].GetY())
+                    self.issueCreateLabelCommand('CreateLabel', color ,labelType, ptList)
+                    self.ui.canvas.scene.tempLabel.label.SetLabelColor(color)
+                    self.ui.canvas.scene.UILabelList.append(self.ui.canvas.scene.tempLabel)
+                    self.ui.canvas.scene.addItem(self.ui.canvas.scene.tempLabel)
+                    self.ui.canvas.scene.tempLabel.setLineColor(color)
+                    self.AddLabelNameList(self.templabelName)
+
+                elif labelType == 'linestrip':
+                    # create UIlabel (Line)
+                    self.ui.canvas.scene.tempLabel = MyLineStrip([(ptList[0].GetX(), ptList[0].GetY()), \
+                                                                  (ptList[1].GetX(), ptList[1].GetY())])
+                    if len(ptList) >= 3:
+                        for pt in ptList[2:]:
+                            self.ui.canvas.scene.tempLabel.addPoint((pt.GetX(), pt.GetY()))
+                    self.ui.canvas.scene.tempLabel.updatePath()
+                    self.issueCreateLabelCommand('CreateLabel', color ,labelType, ptList)
+                    self.ui.canvas.scene.tempLabel.label.SetLabelColor(color)
+                    self.ui.canvas.scene.UILabelList.append(self.ui.canvas.scene.tempLabel)
+                    self.ui.canvas.scene.addItem(self.ui.canvas.scene.tempLabel)
+                    self.ui.canvas.scene.tempLabel.setLineColor(color)
+                    self.AddLabelNameList(self.templabelName)
+                
+                elif labelType == 'poly':
+                    # create UIlabel (Polygon)
+                    self.ui.canvas.scene.tempLabel = MyLineStrip([(ptList[0].GetX(), ptList[0].GetY()), \
+                                                                  (ptList[1].GetX(), ptList[1].GetY())], \
+                                                                    shape='poly')
+                    if len(ptList) >= 3:
+                        for pt in ptList[2:]:
+                            self.ui.canvas.scene.tempLabel.addPoint((pt.GetX(), pt.GetY()))
+                    self.ui.canvas.scene.tempLabel.updatePath()
+                    self.issueCreateLabelCommand('CreateLabel', color ,labelType, ptList)
+                    self.ui.canvas.scene.tempLabel.label.SetLabelColor(color)
+                    self.ui.canvas.scene.UILabelList.append(self.ui.canvas.scene.tempLabel)
+                    self.ui.canvas.scene.addItem(self.ui.canvas.scene.tempLabel)
+                    self.ui.canvas.scene.tempLabel.setLineColor(color)
+                    self.AddLabelNameList(self.templabelName)
+
+        pass
     
     # set text in StatusBar
     def StatusBarText(self, str):
@@ -253,7 +351,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ui.LabelNameList.addItem(item)
             self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(item)
             
-    def LabelNameDialogShow(self,color): # for Create
+    def LabelNameDialogShow(self, color): # for Create
         self.templabelName = ""
         self.ui.canvas.scene.LabelNameDialog.toolButton.setStyleSheet(f"background-color: {color}")
         self.ui.canvas.scene.LabelNameDialog.color = color
@@ -261,12 +359,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.setFocus()
         QApplication.processEvents()
 
-    def LabelNameDialogShowForEdit(self,label,UIlabel,item): # for Edit
-        self.EditLabel=label
-        self.UIlabel=UIlabel
+    def LabelNameDialogShowForEdit(self, label, UIlabel, item): # for Edit
+        self.EditLabel = label
+        self.UIlabel = UIlabel
         self.EditItem = item
         self.ui.canvas.scene.LabelNameDialog.textEdit.setText(label.GetName())
         color = QColor(label.GetLabelColor())
+        print(label.GetLabelColor())
         self.ui.canvas.scene.LabelNameDialog.toolButton.setStyleSheet(f"background-color: {color.name()}")
         self.ui.canvas.scene.LabelNameDialog.exec_()
         self.ui.canvas.scene.LabelNameDialog.color = label.GetLabelColor()
@@ -275,10 +374,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         if self.checkLabelNameSuccess(str):
             if self.ui.canvas.scene.CreateMode == True:
                 self.templabelName = str    
-                if self.LabelNameList.count(str) == 0:
-                    self.LabelNameList.append(str)
-                    self.ui.LabelNameList.addItem(str)
-                    self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(str)
+                self.AddLabelNameList(str)
             elif self.ui.canvas.scene.EditMode == True:
                 label = self.EditLabel
                 print (color)
@@ -289,9 +385,29 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 if label.GetLabelColor() != color:
                     self.issueEditLabelColorCommand(color ,label)
                     self.UIlabel.setLineColor(color)
-
         self.Color = color   #不管LabelName是否合法都可以改顏色
-        
+
+    def AddLabelNameList(self, str):
+        if self.LabelNameList.count(str) == 0:
+            self.LabelNameList.append(str)
+            self.ui.LabelNameList.addItem(str)
+            self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(str)
+
+    def UpdateLabelNameList(self):
+        UILabelList = self.ui.LabelListWidget
+        self.LabelNameList.clear()
+        for index in range(UILabelList.count()):
+            item = UILabelList.item(index)
+            data = item.data(4).GetName()
+            self.LabelNameList.append(data)
+        self.LabelNameList = list(set(self.LabelNameList))
+        # reset the list
+        self.ui.canvas.scene.LabelNameDialog.LabelNameList.clear()
+        self.ui.LabelNameList.clear()
+        for Name in self.LabelNameList:
+            self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(Name)
+            self.ui.LabelNameList.addItem(Name)
+
     def checkLabelNameSuccess(self, str):
         print(str)
         if len(str) != 0: # sucess 
@@ -319,9 +435,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             # LabelName為空則不創建Label
             self.ui.canvas.scene.drawing = True
 
-    def handle_item_click(self,item):
+    def handle_item_click(self, item):
         if(self.ui.canvas.scene.EditMode):
-            self.LabelNameDialogShowForEdit(item.data(4),item.data(5),item)
+            self.LabelNameDialogShowForEdit(item.data(4), item.data(5), item)
 
     # Call LabelService
     def issueMoveLabelCommand(self, ptlist  , Label):
@@ -337,10 +453,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         UILabelList = self.ui.LabelListWidget
         for index in range(UILabelList.count()):
             item = UILabelList.item(index)
-            data = item.data(4)  # 获取项目的数据，这里假设使用data(5)
+            data = item.data(4)  
             if data == Label:
-                UILabelList.takeItem(index)  # 从列表中移除项目
-        self.labelService.DeleteLabel(Label) 
+                UILabelList.takeItem(index) 
+                break
+        self.labelService.DeleteLabel(Label)
+        self.UpdateLabelNameList()
     
     # Call DIPService
     def issueImageProcessCommand(self, str):
@@ -383,18 +501,34 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.fileService.StoreLabel(LF=MyLabelFile, format='My')
         else :
             self.errorDialog('No any existing image!')
-        
-    # export DIP image 
+            
+    # Save label by other name 
+    def saveAs(self):
+        if self.current_img:
+            file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", 'JSON (*.json)')
+            print(file_name)
+            if file_name:
+                current_labellist = self.labelService.labelList
+                # into File
+                MyLabelFile = self.fileService.ConvertLabel2File(label=current_labellist)
+                # save LabelFile
+                MyLabelFile.SetFileLocation(file_name)
+                self.fileService.StoreLabel(LF=MyLabelFile, format='My')
+        else :
+            self.errorDialog('No any existing image!')
+
+    # Export DIP image 
     def exportImage(self):
         filter_str = "PNG Files (*.png);;TIF Files (*.tif);;All Files (*)"
         if self.current_img :
             file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", filter_str)
             print(file_name)
-            MyImagefile = self.fileService.ConvertImage2File(img=self.current_img)
-            if self.fileService.StoreImage(IF=MyImagefile, fileLocation=file_name):
-                return
-            else:
-                self.errorDialog('Something Wrong!')
+            if file_name:
+                MyImagefile = self.fileService.ConvertImage2File(img=self.current_img)
+                if self.fileService.StoreImage(IF=MyImagefile, fileLocation=file_name):
+                    return
+                else:
+                    self.errorDialog('Something Wrong!')
         else :
             self.errorDialog('No image can be exported!')
 
@@ -407,7 +541,5 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         dlg = QMessageBox()
         dlg.setText(msg)
         button = dlg.exec()
-
-    # export 
 
 

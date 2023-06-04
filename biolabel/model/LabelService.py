@@ -8,7 +8,7 @@ class LabelService():
 
     def CreateLabel(self, name, type, Color, ptList)->Label:
         self.NameList.add(name)
-        return Label(name, type, Color , ptList)
+        return Label(name=name, type=type, color=Color, ptList=ptList)
     
     def moveLabel(self, ptlist , Label)->Label:
         for index , pt in enumerate(ptlist):

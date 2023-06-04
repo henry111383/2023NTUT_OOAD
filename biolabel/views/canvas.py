@@ -173,6 +173,20 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
             self.PressItem = None
         return
     
+    def wheelEvent(self, event: QWheelEvent):
+        zoom_in_factor = 1.1
+        zoom_out_factor = 0.9
+        # 根據滾輪的方向進行放大或縮小
+        if event.delta() > 0:
+            zoom_factor = zoom_in_factor
+        else:
+            zoom_factor = zoom_out_factor
+        # 更新 QGraphicsView 的縮放比例
+        view = self.views()[0]  # 假設只有一個 QGraphicsView
+        view.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        view.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
+        view.scale(zoom_factor, zoom_factor)
+
     def isOutofScene(self, pt):
         if isinstance(pt , Point):
             w, h = self.width(), self.height()
@@ -265,25 +279,6 @@ class MyScene(QGraphicsScene): # 用來放自己的圖或標註
         self.msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         self.msg_box.setDefaultButton(QMessageBox.No)
 
-    def wheelEvent(self, event: QWheelEvent):
-        # self.keycode = event.key()
-        # print(self.keycode)
-        # if self.keycode == 16777216: # esc
-        #     self.resetDrawing()
-        zoom_in_factor = 1.1
-        zoom_out_factor = 0.9
-
-        # 根據滾輪的方向進行放大或縮小
-        if event.delta() > 0:
-            zoom_factor = zoom_in_factor
-        else:
-            zoom_factor = zoom_out_factor
-
-        # 更新 QGraphicsView 的縮放比例
-        view = self.views()[0]  # 假設只有一個 QGraphicsView
-        view.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
-        view.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
-        view.scale(zoom_factor, zoom_factor)
 
 class GraphicView(QGraphicsView):
     def __init__(self, parent=None):
