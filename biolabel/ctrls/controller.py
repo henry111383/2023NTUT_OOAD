@@ -324,8 +324,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.LabelNameDialogShowForEdit(item.data(4),item.data(5),item)
 
     # Call LabelService
-    def issueMoveLabelCommand(self, moveX , moveY , index , Label):
-        self.labelService.moveLabel( moveX , moveY , index , Label) 
+    def issueMoveLabelCommand(self, ptlist  , Label):
+        self.labelService.moveLabel( ptlist , Label) 
 
     def issueEditLabelNameCommand(self, labelname, Label):
         self.labelService.EditLabelName( labelname, Label) 

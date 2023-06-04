@@ -1,6 +1,7 @@
 import unittest
 import os, sys
-
+import PyQt5
+from  PyQt5 import QtCore
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 from biolabel.model.LabelService import *
@@ -35,30 +36,21 @@ class LabelService_LabelServiceShouldBeCorrect(unittest.TestCase):
         self.assertEqual(ExpectType ,NewLabel.GetLabelType())
         self.assertEqual(ExpectColor ,NewLabel.GetLabelColor())
         self.assertEqual(ExpectptList ,NewLabel.GetPoint())
-    def test_LabelService_MoveLabelOnePoint(self):
-        MoveX = 40
-        MoveY = 10
-        index = 1
-        MoveLabel = self.LabelService.moveLabel(MoveX,MoveY,index,self.PolyLabel1)
-        ptList = MoveLabel.GetPoint()
-        ExceptPoint = Point(70,40)
-        self.assertEqual(ExceptPoint.GetX() , ptList[1].GetX())
-        self.assertEqual(ExceptPoint.GetY() , ptList[1].GetY())
+
     def test_LabelService_MoveLabelAllePoint(self):
-        MoveX = 10
-        MoveY = 10
-        index = len(self.PolyLabel1.GetPoint())
-        MoveLabel = self.LabelService.moveLabel(MoveX,MoveY,index,self.PolyLabel1)
-        ptList = MoveLabel.GetPoint()
-        ExceptPoint0 = Point(20,20)
-        ExceptPoint1 = Point(40,40)
-        ExceptPoint2 = Point(110,110)
-        self.assertEqual(ExceptPoint0.GetX() , ptList[0].GetX())
-        self.assertEqual(ExceptPoint0.GetY() , ptList[0].GetY())
-        self.assertEqual(ExceptPoint1.GetX() , ptList[1].GetX())
-        self.assertEqual(ExceptPoint1.GetY() , ptList[1].GetY())
-        self.assertEqual(ExceptPoint2.GetX() , ptList[2].GetX())
-        self.assertEqual(ExceptPoint2.GetY() , ptList[2].GetY())
+        ExceptPoint0 = PyQt5.QtCore.QPointF(20,20)
+        ExceptPoint1 = PyQt5.QtCore.QPointF(40,40)
+        ExceptPoint2 = PyQt5.QtCore.QPointF(110,110)
+        moveptList = [ExceptPoint0,ExceptPoint1,ExceptPoint2]
+        MoveLabel = self.LabelService.moveLabel(moveptList,self.PolyLabel1)
+        ptList =  MoveLabel.GetPoint()
+        self.assertEqual(ExceptPoint0.x() , ptList[0].GetX())
+        self.assertEqual(ExceptPoint0.y() , ptList[0].GetY())
+        self.assertEqual(ExceptPoint1.x() , ptList[1].GetX())
+        self.assertEqual(ExceptPoint1.y() , ptList[1].GetY())
+        self.assertEqual(ExceptPoint2.x() , ptList[2].GetX())
+        self.assertEqual(ExceptPoint2.y() , ptList[2].GetY())
+        
     def test_LabelService_EditLabelName(self):
         Name = "RectLabel1"
         EditLabel = self.LabelService.EditLabelName(Name,self.RectLabel2)

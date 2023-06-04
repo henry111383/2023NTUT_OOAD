@@ -10,24 +10,9 @@ class LabelService():
         self.NameList.add(name)
         return Label(name, type, Color , ptList)
     
-    def moveLabel(self, moveX, moveY , index , Label)->Label:
-        ptList = Label.GetPoint()
-        ptNumber = len(ptList)
-        if(index == ptNumber):
-            for i in range (0,index):
-                NewPoint = Point(0,0)
-                pointX = ptList[i].GetX()+moveX
-                pointY = ptList[i].GetY()+moveY
-                NewPoint.SetX(pointX)
-                NewPoint.SetY(pointY)
-                Label.UpdatePoint(i,NewPoint)
-        else:
-            NewPoint = Point(30,0)
-            pointX = ptList[index].GetX()+moveX
-            pointY = ptList[index].GetY()+moveY
-            NewPoint.SetX(pointX)
-            NewPoint.SetY(pointY)
-            Label.UpdatePoint(index,NewPoint)
+    def moveLabel(self, ptlist , Label)->Label:
+        for index , pt in enumerate(ptlist):
+            Label.UpdatePoint(index,Point(pt.x(),pt.y()))
         return Label
     
     def EditLabelName(self, Name, Label)->Label:
