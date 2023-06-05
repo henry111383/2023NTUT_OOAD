@@ -116,7 +116,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         
         # self.ui.LabelListWidget.itemClicked.connect(self.item_clicked)
         self.ui.LabelListWidget.itemClicked.connect(self.handle_item_click)
-
+        self.ui.FileListWidget.itemClicked.connect(self.FileListItemClick)
+        
     def changeshape(self,shape):
         self.ui.canvas.shape=shape
 
@@ -154,23 +155,28 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     # === MenuBar action : OpenFile ===
     def open_file(self):
-        self.current_file, filetype = QFileDialog.getOpenFileName(self, "Open file", "./")
-        MyJsonName = os.path.dirname(self.current_file) \
+        filename, filetype = QFileDialog.getOpenFileName(self, "Open file", "./")
+        self.open_file_subfunction(filename)
+
+    def open_file_subfunction(self, file_name):
+        self.current_file = file_name
+        MyJsonName = os.path.dirname(file_name) \
                     + '/' \
-                    + os.path.splitext(os.path.basename(self.current_file))[0] \
+                    + os.path.splitext(os.path.basename(file_name))[0] \
                     + '.json'
-        
-        print(self.current_file, filetype)
+
+        print(self.current_file)
         print(MyJsonName)
 
-        if self.current_file :
-            self.read_img_to_view(self.current_file)
+        if file_name :
+            self.read_img_to_view(file_name)
             if self.original_img :
                 self.resetMode()
                 self.ui.canvas.scene.ImgLoad = True
             else:
                 self.errorDialog('Not Supported Format')
             self.read_labels_to_view(MyJsonName)
+            self.ui.canvas.scene.resetDrawing()
 
 
     # === MenuBar action :OpenDir ===
@@ -188,25 +194,15 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                         supportedFlag = True
                         break
                 if supportedFlag :
-                    UIFileList.addItem(fileItem)
+                    item = QtWidgets.QListWidgetItem()
+                    item.setText(fileItem)
+                    item.setData( 4, folder_path)  
+                    UIFileList.addItem(item)
+            self.resetMode()
+            self.ui.canvas.scene.clear()
         else: 
             return
-            
-        
-        
-        # 
-        # for index in range(UILabelList.count()):
-        #     item = UILabelList.item(index)
-        #     data = item.data(4).GetName()
-        #     self.LabelNameList.append(data)
-        # self.LabelNameList = list(set(self.LabelNameList))
-        # # reset the list
-        # self.ui.canvas.scene.LabelNameDialog.LabelNameList.clear()
-        # self.ui.LabelNameList.clear()
-        # for Name in self.LabelNameList:
-        #     self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(Name)
-        #     
-
+    
         
 
     # reset Mode after OpenFile
@@ -229,6 +225,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.UILabelList.clear()
         self.ui.LabelListWidget.clear()
 
+    # def clearView(self):
+    #     self.ui.canvas.scene
     # ============= Read Data to View =============
     # read image to view
     def read_img_to_view(self, imgFileLocation):
@@ -326,7 +324,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     self.ui.canvas.scene.addItem(self.ui.canvas.scene.tempLabel)
                     self.ui.canvas.scene.tempLabel.setLineColor(color)
                     self.AddLabelNameList(self.templabelName)
-
+            self.Click_EditLabel()
         pass
 
     # ============= For Main View =============
@@ -460,6 +458,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         if(self.ui.canvas.scene.EditMode):
             self.LabelNameDialogShowForEdit(item.data(4), item.data(5), item)
 
+    def FileListItemClick(self,item):  
+        self.open_file_subfunction(os.path.join(item.data(4), item.text()))
 
     # Call LabelService
     def issueMoveLabelCommand(self, ptlist  , Label):
