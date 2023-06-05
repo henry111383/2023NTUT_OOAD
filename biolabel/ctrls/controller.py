@@ -7,6 +7,7 @@ from views.canvas import *
 import os
 import numpy as np
 import cv2
+import pandas as pd
 from views.Ui_label import *
 from model.LabelService import LabelService
 from model.ImageProcessService import ImageProcessService
@@ -174,10 +175,26 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     # === MenuBar action :OpenDir ===
     def open_folder(self):
+        supported_format = ['.bmp', '.pbm', '.pgm', '.ppm', '.sr', '.ras', '.jpeg', '.jpg', '.jpe', '.jp2', '.tiff', '.tif', '.png']
         folder_path = QFileDialog.getExistingDirectory(self, "Open folder", "./")
-        print(folder_path)
-        # UILabelList = self.ui.LabelListWidget
-        # self.LabelNameList.clear()
+        if folder_path:
+            
+            UIFileList = self.ui.FileListWidget
+            self.ui.FileListWidget.clear()
+            for fileItem in os.listdir(folder_path):
+                supportedFlag = False
+                for fmt in supported_format:
+                    if fmt in fileItem:
+                        supportedFlag = True
+                        break
+                if supportedFlag :
+                    UIFileList.addItem(fileItem)
+        else: 
+            return
+            
+        
+        
+        # 
         # for index in range(UILabelList.count()):
         #     item = UILabelList.item(index)
         #     data = item.data(4).GetName()
@@ -188,7 +205,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # self.ui.LabelNameList.clear()
         # for Name in self.LabelNameList:
         #     self.ui.canvas.scene.LabelNameDialog.LabelNameList.addItem(Name)
-        #     self.ui.LabelNameList.addItem(Name)
+        #     
 
         
 
@@ -212,7 +229,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.UILabelList.clear()
         self.ui.LabelListWidget.clear()
 
-
+    # ============= Read Data to View =============
     # read image to view
     def read_img_to_view(self, imgFileLocation):
         self.original_img = self.fileService.LoadImage(imgFileLocation)
@@ -311,7 +328,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     self.AddLabelNameList(self.templabelName)
 
         pass
-    
+
+    # ============= For Main View =============
     # set text in StatusBar
     def StatusBarText(self, str):
         self.ui.statusBar.showMessage(str)
@@ -344,7 +362,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ui.canvas.setCursor(CURSOR_GRAB)
         else:
             self.ui.canvas.setCursor(CURSOR_DEFAULT)
-            
+    
+    # ============= Create Labels =============
     # set LabelName
     def SetLabelNameList(self):
         for item in self.LabelNameList:
@@ -435,9 +454,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             # LabelName為空則不創建Label
             self.ui.canvas.scene.drawing = True
 
+    
+    # ============= Control Labels =============
     def handle_item_click(self, item):
         if(self.ui.canvas.scene.EditMode):
             self.LabelNameDialogShowForEdit(item.data(4), item.data(5), item)
+
 
     # Call LabelService
     def issueMoveLabelCommand(self, ptlist  , Label):
@@ -460,6 +482,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.labelService.DeleteLabel(Label)
         self.UpdateLabelNameList()
     
+    # ============= DIP =============
     # Call DIPService
     def issueImageProcessCommand(self, str):
         # revision channel name
@@ -489,6 +512,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             pix = QPixmap.fromImage(qImg)
             self.imgItem.setPixmap(pix)
 
+    # ============= Save =============
     # Save My label to Json
     def saveMyLabel(self):
         if self.original_img :
@@ -517,6 +541,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         else :
             self.errorDialog('No any existing image!')
 
+    # ============= Export =============
     # Export DIP image 
     def exportImage(self):
         filter_str = "PNG Files (*.png);;TIF Files (*.tif);;All Files (*)"
@@ -532,11 +557,33 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         else :
             self.errorDialog('No image can be exported!')
 
+    # Export Label to csv
     def exportLabel(self):
-        print('exportLabel')
+        if self.current_img :
+            file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv)")
+            if file_name:
+                df = {'Name':[], 'Color':[], 'Type':[], 'Points(XY)':[]}
+                for label_ in self.labelService.labelList.GetLabelList():
+                    df['Name'].append(label_.GetName())
+                    df['Color'].append(label_.GetLabelColor())
+                    df['Type'].append(label_.GetLabelType())
+                    # points to xy
+                    ptlist = label_.GetPoint()
+                    templist = []
+                    for pt in ptlist:
+                        tempX = pt.GetX()
+                        tempY = pt.GetY()
+                        templist.append([tempX, tempY])
+                    df['Points(XY)'].append(templist)
+                df = pd.DataFrame.from_dict(df)
+                df.to_csv(file_name)
+                print('exportLabel')
+            else:
+                self.errorDialog('Something Wrong!')
+        else :
+            self.errorDialog('No image can be exported!')
 
-
-    # ======== message ========
+    # ============= message =============
     def errorDialog(self, msg):
         dlg = QMessageBox()
         dlg.setText(msg)
