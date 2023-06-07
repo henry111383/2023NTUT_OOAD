@@ -50,10 +50,22 @@ class LabelService_LabelServiceShouldBeCorrect(unittest.TestCase):
         self.assertEqual(ExceptPoint1.y() , ptList[1].GetY())
         self.assertEqual(ExceptPoint2.x() , ptList[2].GetX())
         self.assertEqual(ExceptPoint2.y() , ptList[2].GetY())
-        
+
     def test_LabelService_EditLabelName(self):
         Name = "RectLabel1"
         EditLabel = self.LabelService.EditLabelName(Name,self.RectLabel2)
         self.assertEqual(Name , EditLabel.GetName())
+
+    def test_LabelService_EditLabelColor(self):
+        Color = "#00ff00"
+        EditLabel = self.LabelService.EditLabelColor(Color,self.RectLabel2)
+        self.assertEqual(Color , EditLabel.GetLabelColor())
+
+    def test_LabelService_DeleteLabel(self):
+        self.LabelService.labelList.AddLabel(self.PolyLabel1)
+        self.LabelService.labelList.AddLabel(self.RectLabel2)
+        self.LabelService.DeleteLabel(self.PolyLabel1)
+        self.assertEqual(self.RectLabel2 , self.LabelService.labelList.GetLabelList()[0])
+        self.assertEqual(1 , len(self.LabelService.labelList.GetLabelList()))
 
    
