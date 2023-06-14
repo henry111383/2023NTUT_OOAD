@@ -342,7 +342,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         scene = self.ui.canvas.scene
         if scene.EditMode :
             for item in scene.UILabelList:
-                item.setFlag(QGraphicsItem.ItemIsSelectable, True)
+                item.setFlag(QGraphicsItem.ItemIsSelectable, False)
                 item.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
                 item.setFlag(QGraphicsItem.ItemIsFocusable, True)
                 item.setFlag(QGraphicsItem.ItemIsMovable, True) 
@@ -386,10 +386,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.EditItem = item
         self.ui.canvas.scene.LabelNameDialog.textEdit.setText(label.GetName())
         color = QColor(label.GetLabelColor())
-        print(label.GetLabelColor())
         self.ui.canvas.scene.LabelNameDialog.toolButton.setStyleSheet(f"background-color: {color.name()}")
-        self.ui.canvas.scene.LabelNameDialog.exec_()
         self.ui.canvas.scene.LabelNameDialog.color = label.GetLabelColor()
+        self.ui.canvas.scene.LabelNameDialog.exec_()
+        
         
     def LabelNameAccept(self, str, color):
         if self.checkLabelNameSuccess(str):
@@ -398,15 +398,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.AddLabelNameList(str)
             elif self.ui.canvas.scene.EditMode == True:
                 label = self.EditLabel
-                print (color)
-                print(label.GetLabelColor())
                 if label.GetName() != str:
                     self.issueEditLabelNameCommand(str ,label)
                     self.EditItem.setText(str)
                 if label.GetLabelColor() != color:
                     self.issueEditLabelColorCommand(color ,label)
                     self.UIlabel.setLineColor(color)
-        self.Color = color   #不管LabelName是否合法都可以改顏色
+                    self.Color = color   
 
     def AddLabelNameList(self, str):
         if self.LabelNameList.count(str) == 0:
