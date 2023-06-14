@@ -238,6 +238,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             # get size of image
             img = self.original_img.GetImg()
             h, w, _ = img.shape
+            img[0, : , :] = 0
+            img[h-1, : ,:] = 0
+            img[:, w-1, :] = 0
+            img[:, 0, :] = 0
             # set QImage
             qImg = QImage(img, w, h, 3 * w, QImage.Format_RGB888)
             # set QPixmanp
