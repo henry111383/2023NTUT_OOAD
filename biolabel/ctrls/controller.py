@@ -389,7 +389,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.canvas.scene.LabelNameDialog.toolButton.setStyleSheet(f"background-color: {color.name()}")
         self.ui.canvas.scene.LabelNameDialog.color = label.GetLabelColor()
         self.ui.canvas.scene.LabelNameDialog.exec_()
-        
+        self.UpdateLabelNameList()
         
     def LabelNameAccept(self, str, color):
         if self.checkLabelNameSuccess(str):
@@ -404,7 +404,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 if label.GetLabelColor() != color:
                     self.issueEditLabelColorCommand(color ,label)
                     self.UIlabel.setLineColor(color)
-                    self.Color = color   
+                    self.Color = color 
 
     def AddLabelNameList(self, str):
         if self.LabelNameList.count(str) == 0:
