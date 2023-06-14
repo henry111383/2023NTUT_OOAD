@@ -8,8 +8,12 @@ from test_imageProcessService import ImageProcessService_ImageProcessServiceShou
 from test_imagefile import ImageFileShouldBeCorrect 
 from test_labelfile import LabelFileShouldBeCorrect
 from test_labelService import LabelService_LabelServiceShouldBeCorrect
+from test_file import File_FileShouldBeCorrect
+from test_fileService import File_FileServiceShouldBeCorrect
+
 if __name__ == '__main__':
-    
+
+    unittest.main(verbosity=2)
     Alltest = []
     Alltest.append(unittest.TestLoader().loadTestsFromTestCase(Point_PointShouldBeCorrect))
     Alltest.append(unittest.TestLoader().loadTestsFromTestCase(Label_RectLabelShouldBeCorrect))
@@ -19,5 +23,7 @@ if __name__ == '__main__':
     Alltest.append(unittest.TestLoader().loadTestsFromTestCase(ImageFileShouldBeCorrect))
     Alltest.append(unittest.TestLoader().loadTestsFromTestCase(LabelFileShouldBeCorrect))
     Alltest.append(unittest.TestLoader().loadTestsFromTestCase(LabelService_LabelServiceShouldBeCorrect))
+    Alltest.append(unittest.TestLoader().loadTestsFromTestCase(File_FileShouldBeCorrect))
+    Alltest.append(unittest.TestLoader().loadTestsFromTestCase(File_FileServiceShouldBeCorrect))
     testGroup = unittest.TestSuite(Alltest)
     unittest.TextTestRunner(verbosity=2).run(testGroup)

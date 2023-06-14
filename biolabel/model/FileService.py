@@ -54,15 +54,15 @@ class FileService():
     
     def LoadUILabel(self, fileLocation:str)-> dict:
         if os.path.exists(fileLocation):
-            print('Json Exists!')
+            # print('Json Exists!')
             with open(fileLocation) as f:
                 data = json.load(f)
                 try :
                     if ["Name", "Color", "Type", "Points"] == list(data['0'].keys()):
-                        print('is Our JSON')
+                        # print('is Our JSON')
                         return data
                     else :
-                        print('not our JSON')
+                        # print('not our JSON')
                         return dict()
                 except :
                     return dict()
@@ -74,11 +74,5 @@ class FileService():
     def ConvertLabel2File(self, label:LabelList )-> LabelFile: 
         return LabelFile(labelList=label)
         
-    def ConvertFile2Label(self, file :File)-> LabelList:
-        pass    #todo 
-
     def ConvertImage2File(self, img:Image) -> ImageFile:
         return ImageFile(image=img)
-
-    def ConvertFile2Image(self,  file :File) -> Image:
-        pass    #todo 

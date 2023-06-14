@@ -10,6 +10,7 @@ class ImageFileShouldBeCorrect(unittest.TestCase):
         self.temp = cv2.cvtColor(cv2.imread('hook.png'), cv2.COLOR_BGR2RGB)
         self.Image = Image(value=self.temp, channel='RGB', imageName='Test') 
         self.IF = ImageFile(self.Image, fileLocation='C://secret/Test.json', fileFormat='COCO', fileName='Test', directory='C://secret')
+    
     def tearDown(self):
         del self.temp
         del self.Image
